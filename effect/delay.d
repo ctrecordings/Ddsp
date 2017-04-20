@@ -1,0 +1,6 @@
+module delay;
+
+class Delay
+{
+  
+}
