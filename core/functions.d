@@ -1,4 +1,4 @@
-module dsp.core.functions;
+module functions;
 
 import std.math;
 

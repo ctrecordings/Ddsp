@@ -3,17 +3,17 @@ Author: Ethan Reker
 Date: April 12, 2017
 Purpose:  class to circular buffer data for use in delay lines and modulation.
 */
-module dsp.core.buffer;
+module buffer;
 
-struct Buffer(T)
+class Buffer (T)
 {
   T[] buffer;
   const default_size = 1000;
   
-  ulong readIndex, writeIndex;
+  size_t readIndex, writeIndex;
   
   /+Initializes the Buffer with a set size +/
-  this(ulong size)
+  this(size_t size)
   {
     buffer.length = size;
     writeIndex = size - 1;
@@ -23,31 +23,55 @@ struct Buffer(T)
   this()
   {
     buffer.length = default_size;
+	writeIndex = size - 1;
+    readIndex = 0;
   }
   
-  T read(){
-    float val = buffer[readIndex];
-    increment[readIndex];
+  T read() nothrow @nogc 
+  {
+    T val = buffer[readIndex];
+    increment(readIndex);
     return val;
   }
   
-  void write(T sample)
+  void write(T sample) nothrow @nogc
   {
     buffer[writeIndex] = sample;
     increment(writeIndex);
   }
   
   
-  void increment(ulong index)
+  void increment(ref size_t index) nothrow @nogc
   {
     if(++index == buffer.length)
       index = 0;
   }
   
-  void decrement(ulong index)
+  void decrement(ref size_t index) nothrow @nogc
   {
     if(--index < 0)
       index = buffer.length - 1;
   }
   
+  size_t size() nothrow @nogc
+  {
+	return buffer.length;
+  }
+  
+  size_t rIndex() nothrow @nogc
+  {
+	return readIndex;
+  }
+  
+  size_t wIndex() nothrow @nogc
+  {
+	return writeIndex;
+  }
+  
+}
+
+@safe unittest
+{
+	
+
 }
