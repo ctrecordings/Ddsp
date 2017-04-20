@@ -39,7 +39,11 @@ class Buffer (T)
     buffer[writeIndex] = sample;
     increment(writeIndex);
   }
-  
+  void resize(size_t size)
+  {
+    int difference = numSamples - size;
+    shifReadIndex(difference);
+  }
   
   void increment(ref size_t index) nothrow @nogc
   {
@@ -52,7 +56,12 @@ class Buffer (T)
     if(--index < 0)
       index = buffer.length - 1;
   }
-  
+	
+  void shiftReadIndex(ref size_t amount)
+  {
+	  if(amount < 0){	  
+	  }
+  }
   size_t size() nothrow @nogc
   {
 	return buffer.length;
