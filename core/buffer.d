@@ -3,7 +3,7 @@ Author: Ethan Reker
 Date: April 12, 2017
 Purpose:  class to circular buffer data for use in delay lines and modulation.
 */
-module buffer;
+module dlangdsp.core.buffer;
 
 class Buffer (T)
 {
@@ -41,8 +41,8 @@ class Buffer (T)
   }
   void resize(size_t size)
   {
-    int difference = numSamples - size;
-    shifReadIndex(difference);
+    size_t difference = buffer.length - size;
+    shiftReadIndex(difference);
   }
   
   void increment(ref size_t index) nothrow @nogc
@@ -81,6 +81,5 @@ class Buffer (T)
 
 @safe unittest
 {
-	
-
+	Buffer!float b = new Buffer!float(1000);
 }

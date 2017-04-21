@@ -1,0 +1,19 @@
+{
+	"name": "dlangdsp",
+	"authors": [
+		"Ethan Reker"
+	],
+	"description": "A",
+	"copyright": "Copyright © 2017, Reker",
+	"license": "GPL",
+	"sourcePaths": [
+		"core",
+		"effect",
+		"filter"
+	],
+	"importPaths": [
+		"core",
+		"effect",
+		"filter"
+	]
+}
