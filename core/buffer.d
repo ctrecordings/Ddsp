@@ -3,7 +3,7 @@ Author: Ethan Reker
 Date: April 12, 2017
 Purpose:  class to circular buffer data for use in delay lines and modulation.
 */
-module dlangdsp.core.buffer;
+module ddsp.core.buffer;
 
 class Buffer (T)
 {

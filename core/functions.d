@@ -1,4 +1,4 @@
-module functions;
+module ddsp.core.functions;
 
 import std.math;
 

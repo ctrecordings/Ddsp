@@ -1,10 +1,10 @@
-module dlangdsp.effect.delay;
+module ddsp.effect.delay;
 
 enum DelayMode {digital, analog}
 
 class Delay
 {
-  private import dlangdsp.core.buffer;
+  private import ddsp.core.buffer;
   public:
   this(size_t delayAmount, float fb, float wet  = 0)
   {

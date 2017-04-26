@@ -1,6 +1,6 @@
-module dlangdsp.filter.biquadfilter;
+module ddsp.filter.biquadfilter;
 
-import dlangdsp.core.buffer;
+import ddsp.core.buffer;
 
 class BiQuadFilter
 { 
