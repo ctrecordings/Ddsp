@@ -18,6 +18,7 @@ class Buffer (T)
     buffer.length = size;
     writeIndex = size - 1;
     readIndex = 0;
+	initialize();
   }
   
   this()
@@ -25,6 +26,12 @@ class Buffer (T)
     buffer.length = default_size;
 	writeIndex = size - 1;
     readIndex = 0;
+	initialize();
+  }
+  
+  void initialize(){
+	for(int i = 0; i < buffer.length; ++i)
+		buffer[i] = 0;
   }
   
   T read() nothrow @nogc 
@@ -39,7 +46,7 @@ class Buffer (T)
     buffer[writeIndex] = sample;
     increment(writeIndex);
   }
-  void resize(size_t size)
+  void resize(size_t size) nothrow @nogc
   {
     size_t difference = buffer.length - size;
     shiftReadIndex(difference);
@@ -57,7 +64,7 @@ class Buffer (T)
       index = buffer.length - 1;
   }
 	
-  void shiftReadIndex(ref size_t amount)
+  void shiftReadIndex(ref size_t amount) nothrow @nogc
   {
 	  if(amount < 0){	  
 	  }
@@ -79,7 +86,13 @@ class Buffer (T)
   
 }
 
-@safe unittest
-{
-	Buffer!float b = new Buffer!float(1000);
+@system unittest
+{	
+	import std.stdio;
+	writeln("Buffer unittest..");
+	Buffer!float b = new Buffer!float(100);
+	for(int i = 0; i < 200; ++i){
+		b.write(i);
+		writefln("%s", b.read());
+	}
 }
