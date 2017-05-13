@@ -1,139 +1,157 @@
 /**
-Author: Ethan Reker
-Date: April 12, 2017
-Purpose:  class to circular buffer data for use in delay lines and modulation.
+Copyright: 2017 Cut Through Recordings
+License: GNU General Public License
+Author(s): Ethan Reker
 */
-module ddsp.core.buffer;
+module buffer;
 
 /**
-Points to a specified location in a buffer.
+An Index that points to a position in a buffer.
 */
-class bufferIndex
+class BufferIndex
 {
-  static int numIndexes = 0;
-  size_t position;
-  int id;
-  this(string name, size_t position = 0)
-  {
-    id = ++numIndexes;
-    position = 0;
-  }
+    public:
+
+    this(size_t position, size_t bufferLength, int id)
+    {
+        _id = id;
+        _position = position;
+        _bufferLength = bufferLength;
+    }
+
+    @property size_t position() nothrow @nogc { return _position; }
+
+    size_t getPositionAndIncrement() nothrow @nogc
+    {
+        if(++_position == _bufferLength)
+            _position = 0;
+        return position;
+    }
+
+    void resetSize(size_t bufferLength) nothrow @nogc
+    {
+        _bufferLength = bufferLength;
+        if(position >= bufferLength){
+            _position %= bufferLength;
+        }
+    }
+
+    private:
+
+    int _id;
+    size_t _position;
+    size_t _bufferLength;
 }
 
-class Buffer (T)
+
+/**
+
+*/
+class AudioBuffer
 {
-  T[] buffer;
-  const default_size = 1000;
-  bufferIndex[] indexes;
-  size_t readIndex, writeIndex;
-  size_t bufferLength;
+    public:
 
-  /+Initializes the Buffer with a set size +/
-  this(size_t size)
-  {
-    indexes ~= new bufferIndex("read");
-    indexes ~= new bufferIndex("write");
-    buffer.length = size;
-    bufferLength = size;
-    writeIndex = size - 1;
-    readIndex = 0;
-	  initialize();
-  }
+    this(size_t size)
+    {
+        buffer.length = size;
+        _sudoLength = size;
+        for(size_t i = 0; i < _sudoLength; ++i){
+            buffer[i] = 0;
+        }
+    }
 
-  this()
-  {
-    buffer.length = default_size;
-	  writeIndex = size - 1;
-    readIndex = 0;
-	  initialize();
-  }
+    /**
+    Creates a new index at the startingPosition and assigns it an id to be
+    retrieved by.
+    */
+    void addIndex(int startingPosition, int id)
+    {
+        assert(startingPosition < _sudoLength && startingPosition >= 0);
+        if(_indexList.length <= id)
+            _indexList.length = id + 1;
 
-  void addIndex(size_t position, string name)
-  {
-    indexes ~= new bufferIndex()
-  }
+        assert(_indexList.length > id);
+        _indexList[id] = new BufferIndex(startingPosition, _sudoLength, id);
+    }
 
-  void initialize(){
-  	for(int i = 0; i < buffer.length; ++i)
-  		buffer[i] = 0;
-  }
+    /**
+    Retrieves the Index with specified Id
+    */
+    BufferIndex getIndex(int id) nothrow @nogc
+    {
+        assert(id >= 0 && id < _indexList.length);
+        return _indexList[id];
+    }
 
-  T read() nothrow @nogc
-  {
-    T val = buffer[readIndex];
-    increment(readIndex);
-    return val;
-  }
+    /**
+    Read the buffer at the position of the given index id.
+    */
+    float read(int indexId) nothrow @nogc
+    {
+        return buffer[getIndex(indexId).getPositionAndIncrement()];
+    }
 
-  void write(T sample) nothrow @nogc
-  {
-    buffer[writeIndex] = sample;
-    increment(writeIndex);
-  }
-  void resize(size_t size) nothrow @nogc
-  {
-    bufferLength = size;
-    size_t difference = buffer.length - size;
-	  readIndex = (readIndex - difference) % size;
-    //shiftReadIndex(difference);
-  }
+    /**
+    Write to the buffer at the position of the given index id.
+    */
+    void write(int indexId, float value) nothrow @nogc
+    {
+        buffer[getIndex(indexId).getPositionAndIncrement()] = value;
+    }
 
-  void increment(ref size_t index) nothrow @nogc
-  {
-    if(++index == buffer.length)
-      index = 0;
-  }
+    /**
+    This is currently not ideal since the position of each index is basically
+    chopped off if it is greater than the new size.  The best case would be to
+    shift the indexes first.
+    */
+    void resize(size_t size) nothrow @nogc
+    {
+        size_t difference = size - _sudoLength;
+        _sudoLength += difference;
+        foreach(BufferIndex index; _indexList){
+            index.resetSize(_sudoLength);
+        }
+    }
 
-  void increment(int indexId) nothrow @nogc
-  {
-    if(++index.position == buffer.length)
-      index.position = 0;
-  }
+    @property size_t size() nothrow @nogc {return buffer.length;}
 
-  void decrement(ref size_t index) nothrow @nogc
-  {
-    if(--index < 0)
-      index = buffer.length - 1;
-  }
+    /**
+    Used for testing. Returns buffer array.
+    */
+    float[] getElements() nothrow @nogc {return buffer;}
 
-  void shiftReadIndex(ref size_t amount) nothrow @nogc
-  {
-	if(amount < 0){
-		for(int i = 0; i > amount; i--)
-			decrement(readIndex);
-	}
-	if(amount > 0){
-		for(int i = 0; i < amount; i++)
-			increment(readIndex);
-	}
-  }
-  size_t size() nothrow @nogc
-  {
-	   return bufferLength;
-  }
+    private:
 
-  size_t rIndex() nothrow @nogc
-  {
-	   return readIndex;
-  }
-
-  size_t wIndex() nothrow @nogc
-  {
-	   return writeIndex;
-  }
-
+    float[] buffer;
+    /++ Used as the true length of the buffer so that buffer can be resized without GC +/
+    size_t _sudoLength;
+    BufferIndex[] _indexList;
 }
 
-@system unittest
+unittest
 {
-	import std.stdio;
-	writeln("Buffer unittest..");
-	Buffer!float b = new Buffer!float(100);
-	for(int i = 0; i < 200; ++i){
-		b.write(i);
-		writef("%s ", b.read());
-	}
-  writefln("\nRead Index: %s\nShifting readIndex by 50...", b.rIndex());
-  b.resize(50);
-  writefln("Read Index: %s", b.rIndex());
+    import std.stdio;
+    import std.random;
+
+    Random gen;
+
+    enum indexes
+    {
+        writeIndex,
+        readIndex,
+    }
+
+    AudioBuffer b = new AudioBuffer(100);
+
+    b.addIndex(99, indexes.writeIndex);
+    b.addIndex(0, indexes.readIndex);
+
+    writeln("Buffer test...");
+    writefln("Elements: %s", b.getElements());
+    for(int i = 0; i < b.size * 2; ++i){
+        float sample = uniform(0.0L, 1.0L, gen);
+        b.write(indexes.writeIndex, sample);
+        writef("%s ", b.read(indexes.readIndex));
+    }
+    writeln("\n...End Buffer test\n");
 }
