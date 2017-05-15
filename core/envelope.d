@@ -129,10 +129,10 @@ unittest
         float rmsVal = envRms.detect(sample);
 
         if((i % 1500) == 0){
-            writefln("Input: %s  Peak:%s  MS:%s  RMS:%s  ", sample, peakVal, msVal, rmsVal);
-            writefln(envPeak.toString());
-            writefln(envMs.toString());
-            writefln(envRms.toString());
+            //writefln("Input: %s  Peak:%s  MS:%s  RMS:%s  ", sample, peakVal, msVal, rmsVal);
+            //writefln(envPeak.toString());
+            //writefln(envMs.toString());
+            //writefln(envRms.toString());
         }
     }
 

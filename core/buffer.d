@@ -3,7 +3,7 @@ Copyright: 2017 Cut Through Recordings
 License: GNU General Public License
 Author(s): Ethan Reker
 */
-module buffer;
+module ddsp.core.buffer;
 
 /**
 An Index that points to a position in a buffer.
