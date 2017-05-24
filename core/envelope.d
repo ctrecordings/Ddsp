@@ -3,7 +3,7 @@ Copyright: 2017 Cut Through Recordings
 License: GNU General Public License
 Author(s): Ethan Reker
 */
-module ddsp.core.envelopedetector;
+module ddsp.core.envelope;
 
 enum DetectorType
 {
@@ -12,29 +12,24 @@ enum DetectorType
     rms
 }
 
-class EnvelopeDetector
+struct EnvelopeDetector
 {
     private import std.math;
 
     public:
 
-    this(bool isDigital = true)
-    {
-        _isDigital = isDigital;
-        _envelope = 0;
-        _delaySample = 0;
-        _attTime = 0;
-        _relTime = 0;
-        _sampleRate = 0;
-        _timeConstant = 0;
-    }
-
     void initialize(float sampleRate,
                     float attTime,
                     float relTime,
                     bool isDigital,
-                    DetectorType type)
+                    DetectorType type) nothrow @nogc
     {
+        _delaySample = 0;
+        _attTime = 0;
+        _relTime = 0;
+        _envelope = 0;
+        _timeConstant = 0;
+
         _sampleRate = sampleRate;
         _isDigital = isDigital;
         setMode(_isDigital);
@@ -43,7 +38,7 @@ class EnvelopeDetector
         _type = type;
     }
 
-    void setMode(bool isDigital)
+    void setMode(bool isDigital) nothrow @nogc
     {
         _isDigital = isDigital;
         if(_isDigital)
@@ -52,19 +47,19 @@ class EnvelopeDetector
             _timeConstant = log(0.368);
     }
 
-    void setAttackTime(float attTime)
+    void setAttackTime(float attTime) nothrow @nogc
     {
         _attTime = exp(_timeConstant/(attTime * _sampleRate * 0.001));
     }
 
-    void setReleaseTime(float relTime)
+    void setReleaseTime(float relTime) nothrow @nogc
     {
         _relTime = exp(_timeConstant/(relTime * _sampleRate * 0.001));
     }
 
-    void setDetectMode(DetectorType type){ _type = type;}
+    void setDetectMode(DetectorType type) nothrow @nogc { _type = type;}
 
-    float detect(float input)
+    float detect(float input)  nothrow @nogc
     {
         input = abs(input);
         _delaySample = _envelope;
@@ -78,12 +73,20 @@ class EnvelopeDetector
         if(_type == DetectorType.ms && _delaySample != 0)
             _envelope *= _delaySample;
         if(_type == DetectorType.rms && _delaySample != 0)
-            _envelope = sqrt(_envelope * _delaySample);
+            _envelope = sqrt((_envelope * _envelope + _delaySample * _delaySample)/2);
 
         return _envelope;
     }
 
-    override string toString()
+    float getEnvelope() nothrow @nogc
+    {
+        return _envelope;
+    }
+
+    /**
+    For unittesting purposes
+    */
+    string toString()
     {
       import std.conv;
       string s = "\nAttack Time: " ~ to!string(_attTime)
@@ -115,9 +118,7 @@ unittest
 
     Random gen;
 
-    EnvelopeDetector envPeak = new EnvelopeDetector(),
-                     envMs = new EnvelopeDetector(),
-                     envRms = new EnvelopeDetector();
+    EnvelopeDetector envPeak, envMs, envRms;
     envPeak.initialize(44100, 100, 100, true, DetectorType.peak);
     envMs.initialize(44100, 1000, 2000, true, DetectorType.ms);
     envRms.initialize(44100, 100, 4000, true, DetectorType.rms);

@@ -1,0 +1,1 @@
+*class to convert linear scale to logarithmic and visa versa

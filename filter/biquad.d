@@ -25,7 +25,7 @@ class BiQuad
 {
     public:
 
-        this()
+        this() nothrow @nogc
         {
 
         }
@@ -36,7 +36,7 @@ class BiQuad
                         float b1,
                         float b2,
                         float c0 = 1,
-                        float d0 = 0)
+                        float d0 = 0)  nothrow @nogc
         {
            _a0 = a0;
            _a1 = a1;
@@ -47,7 +47,8 @@ class BiQuad
            _d0 = d0;
         }
 
-        float nextSample(float input){
+        float getNextSample(float input)  nothrow @nogc
+        {
             float output = (_a0 * input + _a1 * _xn1 + _a1 * _xn2 - _b1 * _yn1 - _b2 * _yn2) * _c0 + (input * _d0);
 
             _xn2 = _xn1;
@@ -61,17 +62,17 @@ class BiQuad
     protected:
 
         //Delay samples
-        float _xn1, _xn2;
-        float _yn1, _yn2;
+        float _xn1=0, _xn2=0;
+        float _yn1=0, _yn2=0;
 
         //Biquad Coeffecients
-        float _a0, _a1, _a2;
-        float _b1, _b2;
-        float _c0, _d0;
+        float _a0=0, _a1=0, _a2=0;
+        float _b1=0, _b2=0;
+        float _c0=1, _d0=0;
 
         float _sampleRate;
         float _qFactor;
         float _frequency;
 
-        void calculateCoefficients(){}
+        void calculateCoefficients()  nothrow @nogc {}
 }
