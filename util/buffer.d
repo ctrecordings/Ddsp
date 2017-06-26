@@ -3,7 +3,9 @@ Copyright: 2017 Cut Through Recordings
 License: GNU General Public License
 Author(s): Ethan Reker
 */
-module ddsp.core.buffer;
+module ddsp.util.buffer;
+
+import core.stdc.stdlib;
 
 /**
 An Index that points to a position in a buffer.
@@ -47,13 +49,14 @@ class BufferIndex
 /**
 
 */
-class AudioBuffer
+struct AudioBuffer
 {
     public:
 
-    this(size_t size)
+    void initialize(size_t size)
     {
-        buffer.length = size;
+        //buffer.length = size;
+        buffer = cast(float*) malloc(size * float.sizeof);
         _sudoLength = size;
         for(size_t i = 0; i < _sudoLength; ++i){
             buffer[i] = 0;
@@ -63,15 +66,18 @@ class AudioBuffer
     /**
     Creates a new index at the startingPosition and assigns it an id to be
     retrieved by.
+    
+    IMPORTANT:
+    0 should be the read index for resizing purposes.
     */
-    void addIndex(int startingPosition, int id)
+    void addIndex(ulong startingPosition, int id)
     {
         assert(startingPosition < _sudoLength && startingPosition >= 0);
         if(_indexList.length <= id)
             _indexList.length = id + 1;
 
         assert(_indexList.length > id);
-        _indexList[id] = new BufferIndex(startingPosition, _sudoLength, id);
+        _indexList[id] = new BufferIndex( cast(uint) startingPosition, _sudoLength, id);
     }
 
     /**
@@ -112,17 +118,35 @@ class AudioBuffer
             index.resetSize(_sudoLength);
         }
     }
+    
+    void betterResize(size_t size) nothrow @nogc
+    {
+        if(size != _size)
+        {
+            float *newBuffer = cast(float*) malloc(size * float.sizeof);
+            
+            //size_t smallerSize = size < _size ? size : _size;
+            for(int i = 0; i < size; ++i){
+                newBuffer[i] = read(0);
+            }
+            
+            free(buffer);
+            buffer = newBuffer;
+        }
+    }
 
-    @property size_t size() nothrow @nogc {return buffer.length;}
+    @property size_t size() nothrow @nogc {return _size;}
 
     /**
     Used for testing. Returns buffer array.
     */
-    float[] getElements() nothrow @nogc {return buffer;}
+    float* getElements() nothrow @nogc {return buffer;}
 
     private:
 
-    float[] buffer;
+    //float[] buffer;
+    float* buffer;
+    size_t _size;
     /++ Used as the true length of the buffer so that buffer can be resized without GC +/
     size_t _sudoLength;
     BufferIndex[] _indexList;
@@ -141,7 +165,9 @@ unittest
         readIndex,
     }
 
-    AudioBuffer b = new AudioBuffer(100);
+    //AudioBuffer b = new AudioBuffer();
+    AudioBuffer b;
+    b.initialize(100);
 
     b.addIndex(99, indexes.writeIndex);
     b.addIndex(0, indexes.readIndex);

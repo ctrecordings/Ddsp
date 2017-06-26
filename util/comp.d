@@ -1,16 +1,23 @@
-module ddsp.core.comp;
+module ddsp.util.comp;
 
 import std.math;
 
-import ddsp.core.envelope;
-import ddsp.core.scale;
+import ddsp.util.envelope;
+import ddsp.util.scale;
 
+/**
+Point for passing x y value pairs
+*/
 struct P
 {
     float x;
     float y;
 }
 
+/**
+Uses polynomial interpolation to fit the curve of the knee.
+The points should be calculated and passed to the function.
+*/
 float kneeInterpolation(P p0, P p1, P p2, float input) nothrow @nogc
 {
     float t = abs(input - p0.x)/(p2.x - p0.x);
@@ -29,6 +36,7 @@ struct Compressor
     float _ratio;
     float _mGain;
     float _gainReduction;
+    float _autoGain;
 
     float _a;
     float _b;
@@ -38,15 +46,27 @@ struct Compressor
 
     void initialize(float sampleRate, float attTime, float relTime, float knee, float threshold, float ratio, float mGain)  nothrow @nogc
     {
-        detector.initialize(sampleRate, attTime, relTime, true, DetectorType.rms);
+        detector.initialize(sampleRate, attTime, relTime, true, DetectorType.peak);
         _knee = knee;
         _threshold = threshold;
+        _autoGain = 2 - pow(10.0, threshold/20.0);
         _mGain = mGain;
         _ratio = ratio;
 
-        _kneeWidth = _knee * _threshold;
+        _kneeWidth = (_knee * _threshold) / 2;
 
         calcCoefficientsAndSetPoints();
+    }
+
+    void setParams(float attTime, float relTime, float knee, float threshold, float ratio, float mGain) nothrow @nogc
+    {
+        detector.setAttackTime(attTime);
+        detector.setReleaseTime(relTime);
+        _knee = knee;
+        _threshold = threshold;
+        _autoGain = 2 - pow(10.0, threshold/20.0);
+        _mGain = mGain;
+        _ratio = ratio;
     }
 
     void calcCoefficientsAndSetPoints()  nothrow @nogc
@@ -66,27 +86,33 @@ struct Compressor
 
     float process(float input)  nothrow @nogc
     {
-        float output = 0;
-        float detectorVal = detector.detect(input);
+        float inputdb = 20 * log10(input);
+        float CS = 1.0 - 1.0/_ratio;
 
-        if(detectorVal >= _threshold + _kneeWidth / 2 ){
-            output = _a * input + _b;
-        }
-        else if(detectorVal >= _threshold - (_kneeWidth / 2)){
-            output = kneeInterpolation(p0, p1, p2, input);
-        }
-        else{
-            output = input;
-        }
+        float detectorVal = 20 * log10(detector.detect(input));
+        float yG = CS * (_threshold - detectorVal);
+        0 < yG ? yG = 0 : yG = yG;
+        yG = pow(10.0, yG/20.0);
+        /*float output = 0;
+        float detectorValue = scale.convert(detector.detect(input));
+        //float detectorValue = 0.9f;
+        float gainVal;
 
-        if(output < input)
-            _gainReduction = input - output;
+        if(detectorValue >= _threshold + _kneeWidth)
+            gainVal = _a * detectorValue + _b;
+        else if(detectorValue >= _threshold - _kneeWidth)
+            gainVal = kneeInterpolation(p0, p1, p2, detectorValue);
         else
-            _gainReduction = 0.0f;
+            gainVal = 1;
 
-        output = output * (1 + _mGain);
+        output = input * gainVal;
 
-        return output;
+        if(abs(output) < abs(input))
+            _gainReduction = abs(input) - abs(output);
+
+        return output;*/
+        _gainReduction = 1 - yG;
+        return input * yG * (1 + _mGain) * _autoGain;
     }
 
     float getReductionAmount() nothrow @nogc

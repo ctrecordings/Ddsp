@@ -2,7 +2,7 @@
 A set of classes for converting between ranges of real values.  Calculating the
 coefficents and storing them saves processing time later.
 */
-module ddsp.core.scale;
+module ddsp.util.scale;
 
 import std.math;
 

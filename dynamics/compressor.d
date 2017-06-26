@@ -1,6 +1,6 @@
 module ddsp.dynamics.compressor;
 
-import ddsp.core.envelope;
+import ddsp.util.envelope;
 
 class Compressor
 {
