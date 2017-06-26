@@ -7,14 +7,18 @@
 	"copyright": "Copyright © 2017, Reker",
 	"license": "GPL",
 	"sourcePaths": [
-		"core",
+		"util",
 		"effect",
 		"filter"
 	],
 	
 	"importPaths": [
-		"core",
+		"util",
 		"effect",
 		"filter"
-	]
+	],
+
+	"dependencies": {
+		"dplug:core": "~>4.0"
+	}
 }

@@ -3,7 +3,7 @@ Copyright: 2017 Cut Through Recordings
 License: GNU General Public License
 Author(s): Ethan Reker
 */
-module ddsp.core.envelope;
+module ddsp.util.envelope;
 
 enum DetectorType
 {
