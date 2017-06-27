@@ -123,7 +123,7 @@ struct Compressor
 
 unittest
 {
-    import std.random;
+    /*import std.random;
     import std.stdio;
 
     Random gen;
@@ -136,5 +136,5 @@ unittest
         float output = c.process(sample);
         if(i % 1001 == 0)
             writefln("Input: %s  |  Output: %s  |  Reduction: %s", sample, output, c.getReductionAmount());
-    }
+    }*/
 }

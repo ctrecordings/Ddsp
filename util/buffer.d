@@ -6,6 +6,8 @@ Author(s): Ethan Reker
 module ddsp.util.buffer;
 
 import core.stdc.stdlib;
+import dplug.core.alignedbuffer;
+import dplug.core.nogc;
 
 /**
 An Index that points to a position in a buffer.
@@ -33,7 +35,7 @@ class BufferIndex
     void resetSize(size_t bufferLength) nothrow @nogc
     {
         _bufferLength = bufferLength;
-        if(position >= bufferLength){
+        if(_position >= bufferLength){
             _position %= bufferLength;
         }
     }
@@ -45,22 +47,24 @@ class BufferIndex
     size_t _bufferLength;
 }
 
-
 /**
-
+TODO: Add separate AlignedBuffers for read and write indexes so that they can
+all be shifted equally on resize operations.
 */
-struct AudioBuffer
+class AudioBuffer
 {
     public:
 
+    /**
+    * Allocates a memory heap for the buffer. And sets each element to 0.
+    */
     void initialize(size_t size)
     {
-        //buffer.length = size;
+        _indexList = makeAlignedBuffer!BufferIndex();
         buffer = cast(float*) malloc(size * float.sizeof);
         _sudoLength = size;
-        for(size_t i = 0; i < _sudoLength; ++i){
-            buffer[i] = 0;
-        }
+        _size = size;
+        clear();
     }
 
     /**
@@ -72,12 +76,8 @@ struct AudioBuffer
     */
     void addIndex(ulong startingPosition, int id)
     {
-        assert(startingPosition < _sudoLength && startingPosition >= 0);
-        if(_indexList.length <= id)
-            _indexList.length = id + 1;
-
-        assert(_indexList.length > id);
-        _indexList[id] = new BufferIndex( cast(uint) startingPosition, _sudoLength, id);
+        BufferIndex newIndex = mallocEmplace!BufferIndex(cast(uint) startingPosition, _sudoLength, id);
+        _indexList.pushBack(newIndex);
     }
 
     /**
@@ -132,24 +132,44 @@ struct AudioBuffer
             
             free(buffer);
             buffer = newBuffer;
+            
+            foreach(BufferIndex index; _indexList)
+            {
+                index.resetSize(size);
+            }
+        }
+    }
+    
+    ///Reset all elements to 0
+    void clear() nothrow @nogc
+    {
+        for(int i = 0; i < _size; ++i)
+        {
+            buffer[i] = 0;
         }
     }
 
     @property size_t size() nothrow @nogc {return _size;}
 
     /**
-    Used for testing. Returns buffer array.
+    Used for testing. Returns buffer as array.
     */
-    float* getElements() nothrow @nogc {return buffer;}
+    float[] getElements()
+    {
+        float[] data;
+        for(int i = 0; i < _size; ++i)
+            data ~= buffer[i];
+        return data;
+    }
 
     private:
 
-    //float[] buffer;
     float* buffer;
     size_t _size;
-    /++ Used as the true length of the buffer so that buffer can be resized without GC +/
+    
     size_t _sudoLength;
-    BufferIndex[] _indexList;
+    
+    AlignedBuffer!BufferIndex _indexList;
 }
 
 unittest
@@ -166,18 +186,20 @@ unittest
     }
 
     //AudioBuffer b = new AudioBuffer();
-    AudioBuffer b;
+    AudioBuffer b = mallocEmplace!AudioBuffer();
     b.initialize(100);
+    b.clear();
 
-    b.addIndex(99, indexes.writeIndex);
     b.addIndex(0, indexes.readIndex);
+    b.addIndex(99, indexes.writeIndex);
 
     writeln("Buffer test...");
     writefln("Elements: %s", b.getElements());
     for(int i = 0; i < b.size * 2; ++i){
         float sample = uniform(0.0L, 1.0L, gen);
         b.write(indexes.writeIndex, sample);
-        writef("%s ", b.read(indexes.readIndex));
+        if(i%10 == 0)
+            writef("%s ", b.read(indexes.readIndex));
     }
     writeln("\n...End Buffer test\n");
 }
