@@ -62,15 +62,5 @@ struct TimeCursor
 
 unittest
 {
-    import std.stdio;
-    writeln("Time Test...");
-    Note note;
-    note.tempo = 100;
-    note.length = half;
-    writeln(note.tempo);
-    writeln(note.length);
-
-    writeln(note.getTimeInMinutes());
-    writeln(note.getTimeInMilliseconds());
-    writeln(note.getTimeInSeconds());
+    
 }

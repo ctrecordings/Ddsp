@@ -3,8 +3,11 @@ module ddsp.effect.delay;
 import ddsp.util.buffer;
 import ddsp.util.functions;
 import ddsp.util.time;
+import ddsp.effect.aeffect;
 
-class DigitalDelay
+import dplug.core.nogc;
+
+class DigitalDelay : AEffect
 {
     public:
 
@@ -12,6 +15,7 @@ class DigitalDelay
 
     void initialize(size_t size, float mix, float feedback)
     {
+        _buffer = mallocEmplace!AudioBuffer();
         _bufferSize = size;
         _buffer.initialize(_bufferSize);
         _buffer.addIndex(0, readIndex);
@@ -37,11 +41,16 @@ class DigitalDelay
         _buffer.write(sidechainIndex, sample);
     }
 
-    float getNextSample(float input) nothrow @nogc
+    override float getNextSample(float input) nothrow @nogc
     {
         float yn = read();
         write((input + _feedback * yn) * 0.5f);
         return _mix * yn + input * (1 - _mix);
+    }
+    
+    override void reset() nothrow @nogc
+    {
+        _buffer.clear();
     }
 
     float getNextSampleSideChain(float input1, float input2) nothrow @nogc
@@ -57,7 +66,7 @@ class DigitalDelay
 
     void resize(size_t size) nothrow @nogc
     {
-        _buffer.resize(size);
+        _buffer.betterResize(size);
     }
 
     size_t size() nothrow @nogc {return _buffer.size();}
@@ -130,14 +139,13 @@ private:
     bool _writeEnabled;
     TimeCursor timeCursor;
     Note delayNote;
-    float _sampleRate;
+    //float _sampleRate;
 }
 
 unittest
 {
     import std.stdio;
     import std.random;
-    import ddsp.util.functions;
     import dplug.core.nogc;
 
     writeln("\nDelay Test");
@@ -145,21 +153,17 @@ unittest
     Random gen;
 
     auto d = mallocEmplace!DigitalDelay();
-    
     d.initialize(2000, 0.5, 0.5);
 
-    for(int i = 0; i < 20000; ++i){
-        float sample = uniform(0.0L, 1.0L, gen);
-        float val = d.getNextSample(sample);
-        if(i%1000 == 0)
-            writef("%s ", val);
-        }
-        d.resize(1500);
-        for(int i = 0; i < 20000; ++i){
-        float sample = uniform(0.0L, 1.0L, gen);
-        float val = d.getNextSample(sample);
-        if(i%1000 == 0)
-            writef("%s ", val);
-    }
-    writeln("\n...End Delay Test\n");
+    //auto d2 = mallocEmplace!SyncedDelay();
+    //d2.initialize(2000, 0.5, 0.5, 44100);
+
+    testEffect(d, "Digital Delay");
+    d.reset();
+    d.resize(1500);
+    //testEffect(d2, "Synced Delay");
+    //d.resize(1500);
+
+    testEffect(d, "Resized Delay");
+
 }
