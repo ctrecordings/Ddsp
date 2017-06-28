@@ -1,23 +1,18 @@
 # Ddsp
 A library for Digital Signal Processing in D with a focus on audio.
-    
-## util
-- buffer.d
-- comp.d
-- envelope.d
-- functions.d
-- scale.d
-- time.d
 
-## effect
-- delay.d
+### Components
+- Circular buffer
+- Digital Delay
+- Compressor
+- Envelope Detector
+- *Oscillator*
+- Generic BiQuad
+- Allpass Filter
+- Linkwitz-Riley Lowpass/Highpass Filters
+- FX Chain
 
-## osc
-- wtoscillator.d
+### Dependecies
+Ddsp depends on `dplug:core` for use of it's `@nogc` capabilities.  The Garbage collector is only used for testing purposes within the library.
 
-## filter
-- allpass.d
-- biquad.d
-- linkwitzriley.d
-
-Much more is planned to be added soon.  There is still some clean-up to be done first though.
+Many more components are planned to be added soon.  
