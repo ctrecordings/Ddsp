@@ -1,6 +1,7 @@
 module ddsp.osc.wtoscillator;
 
 import std.math;
+import std.effect.aeffect;
 
 const float pi = 3.14159265;
 
