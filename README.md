@@ -1,5 +1,5 @@
 # Ddsp
-A library for Digital Signal Processing in D with a focus on audio.
+A high level library for Digital Signal Processing in D with a focus on audio.
 
 ### Components
 - Circular buffer
