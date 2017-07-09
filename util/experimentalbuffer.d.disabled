@@ -9,53 +9,9 @@ import core.stdc.stdlib;
 import dplug.core.alignedbuffer;
 import dplug.core.nogc;
 
-/**
-An Index that points to a position in a buffer.
-*/
-class BufferIndex
+struct Index
 {
-    public:
-
-    this(size_t position, size_t bufferLength, int id)
-    {
-        _id = id;
-        _position = position;
-        _bufferLength = bufferLength;
-    }
-
-    @property size_t position() nothrow @nogc { return _position; }
-
-    size_t getPositionAndIncrement() nothrow @nogc
-    {
-        if(++_position == _bufferLength)
-            _position = 0;
-        return _position;
-    }
     
-    /**
-    * same as above but shifts the index by amount specified
-    */
-    /*size_t getPositionShiftAndIncrement(size_t shiftAmount) nothrow @nogc
-    {
-        _position += shiftAmount + 1;
-        if(_position >= _bufferLength)
-            _position = 
-        //return 
-    }*/
-
-    void resetSize(size_t bufferLength) nothrow @nogc
-    {
-        _bufferLength = bufferLength;
-        if(_position >= bufferLength){
-            _position %= bufferLength;
-        }
-    }
-
-    private:
-
-    int _id;
-    size_t _position;
-    size_t _bufferLength;
 }
 
 /**
@@ -173,12 +129,11 @@ class AudioBuffer
         return data;
     }
 
-    private:
+private:
 
     float* buffer;
+    AlignedBuffer!size_t _indexes ;
     size_t _size;
-    
-    size_t _sudoLength;
     
     AlignedBuffer!BufferIndex _indexList;
 }

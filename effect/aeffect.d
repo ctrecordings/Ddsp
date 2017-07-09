@@ -9,22 +9,21 @@ import dplug.core.nogc;
 abstract class AEffect
 {
 public:
-
-    //abstract void initialize(Args...)(Args args);
     
     /**
     * Process a sample that is passed to the processor, and return the next sample.
     */
-    float getNextSample(float input) nothrow @nogc;
+    abstract float getNextSample(float input) nothrow @nogc;
+    
+    
     
     /**
     * Should be used to free any delay elements or do any setup before play begins.
     */
-    void reset() nothrow @nogc;
+    abstract void reset() nothrow @nogc;
     
 protected:
     float _sampleRate;
-    
 }
 
 class FXChain : AEffect
@@ -62,7 +61,10 @@ private:
     AlignedBuffer!AEffect _fxChain;
 }
 
-void testEffect(AEffect effect, string name)
+/**
+* This function should only be called in a unittest block.
+*/
+void testEffect(AEffect effect, string name, size_t bufferSize = 20000)
 {
     import std.stdio;
     import std.random;
@@ -73,7 +75,7 @@ void testEffect(AEffect effect, string name)
 
     float[] outputs;
 
-    for(int i = 0; i < 20000; ++i){
+    for(int i = 0; i < bufferSize; ++i){
         float sample = uniform(0.0L, 1.0L, gen);
         float val = effect.getNextSample(sample);
         if(i%1000 == 0){
