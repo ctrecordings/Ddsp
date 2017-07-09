@@ -24,7 +24,7 @@ float samplesToMs(float samples, float sampleRate) nothrow @nogc
   return samples / (1000 / sampleRate);
 }
 
-float lagrpol(float[] arrX, float [] arrY, int order, float input)
+float lagrpol(float[] arrX, float [] arrY, int order, float input) nothrow @nogc
 {
   float sum = 0;
   for(int i = 0; i < order; ++i)
@@ -38,6 +38,11 @@ float lagrpol(float[] arrX, float [] arrY, int order, float input)
     sum += Lg * arrY[i];
   }
   return sum;
+}
+
+float linearInterp(float x1, float x2, float y1, float y2, float x) nothrow @nogc
+{
+  return (x - x1) * (y2 - y1) / (x2 - x1) + y1;
 }
 
 unittest
