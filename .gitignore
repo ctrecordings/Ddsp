@@ -1,4 +1,4 @@
-.dub
+*.dub
 docs.json
 __dummy.html
 *.o
@@ -6,3 +6,4 @@ __dummy.html
 __test__*__
 *.exe
 *.lib
+*.disabled

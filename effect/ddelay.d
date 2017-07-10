@@ -16,17 +16,26 @@ public:
     import core.stdc.stdlib;
     import dplug.core.alignedbuffer;
 
-    this(size_t maxSize) nothrow @nogc
+    this() nothrow @nogc
     {
-        _size = maxSize;
-        buffer = cast(float*) malloc(_size * float.sizeof);
-        buffer[0.._size] = 0;
+        //_size = maxSize;
+        //buffer = cast(float*) malloc(_size * float.sizeof);
+        //buffer[0.._size] = 0;
+        buffer = null;
+        _size = 0;
+        _feedback = 0.0f;
+        _mix = 0.0f;
+        _useExternalFeedback = false;
+        
+        _readIndex = 0;
+        _writeIndex = 0;
+        
         feedbackFX = makeAlignedBuffer!AEffect;
     }
     
     ~this() nothrow @nogc { free(buffer); }
     
-    void initialize(float sampleRate, size_t delayInMS, float feedback, float mix) nothrow @nogc
+    void initialize(float sampleRate, float maxSizeMS, float delayInMS, float feedback, float mix) nothrow @nogc
     {
         _sampleRate = sampleRate;
        // _size = size;
@@ -34,15 +43,18 @@ public:
         _mix = mix;
         _delayInSamples = msToSamples(delayInMS, sampleRate);
         
+        //Create buffer if null and reset it to 0
+        _size = cast(size_t)msToSamples(maxSizeMS, sampleRate);
+        if(buffer == null)
+            buffer = cast(float*) malloc(_size * float.sizeof);
+        reset();
+        
         assert(cast(size_t)_delayInSamples <= _size);
         
         _writeIndex = 0;
         _readIndex = _writeIndex - cast(size_t)_delayInSamples;
         if(_readIndex < 0)
             _readIndex += _size;
-        
-        //Called last
-        reset();
     }
     
     void setDelay(size_t msDelay) nothrow @nogc
@@ -153,7 +165,7 @@ private:
     float _feedback;
     float _mix;
     
-    immutable size_t _size;
+    size_t _size;
     float _delayInSamples;
     float _delayInMS;
     
