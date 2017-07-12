@@ -8,19 +8,19 @@ import ddsp.effect.aeffect;
 import ddsp.util.functions;
 
 /**
-* A general purpose Digital Delay with support for external feedback and fractional delay.
+* A general purpose Digital Delay with support for external feedback,
+  fractional delay, and feedback path effects.
 */
 class DDelay : AEffect
 {
-public:
-    import core.stdc.stdlib;
+    import core.stdc.stdlib : malloc, free;
+    import core.stdc.string : memset;
     import dplug.core.alignedbuffer;
+    
+public:
 
     this() nothrow @nogc
     {
-        //_size = maxSize;
-        //buffer = cast(float*) malloc(_size * float.sizeof);
-        //buffer[0.._size] = 0;
         buffer = null;
         _size = 0;
         _feedback = 0.0f;
@@ -38,18 +38,17 @@ public:
     void initialize(float sampleRate, float maxSizeMS, float delayInMS, float feedback, float mix) nothrow @nogc
     {
         _sampleRate = sampleRate;
-       // _size = size;
         _feedback = feedback;
         _mix = mix;
-        _delayInSamples = msToSamples(delayInMS, sampleRate);
+        _delayInSamples = msToSamples(delayInMS, _sampleRate);
         
         //Create buffer if null and reset it to 0
-        _size = cast(size_t)msToSamples(maxSizeMS, sampleRate);
+        _size = cast(size_t)msToSamples(maxSizeMS, _sampleRate);
         if(buffer == null)
             buffer = cast(float*) malloc(_size * float.sizeof);
         reset();
         
-        assert(cast(size_t)_delayInSamples <= _size);
+        assert(_delayInSamples <= cast(float)_size);
         
         _writeIndex = 0;
         _readIndex = _writeIndex - cast(size_t)_delayInSamples;
@@ -57,16 +56,17 @@ public:
             _readIndex += _size;
     }
     
-    void setDelay(size_t msDelay) nothrow @nogc
+    void setDelay(float msDelay) nothrow @nogc
     {
         _delayInSamples = msToSamples(msDelay, _sampleRate);
+        assert(_delayInSamples <= cast(float)_size);
         reset();
     }
-    
-    override float getNextSample(float input) nothrow @nogc
+
+    /*override float getNextSample(float input) nothrow @nogc
     {
         //Non-fractional delay
-        /*float xn = input;
+        float xn = input;
         float yn = buffer[_readIndex];
         
         if(_delayInSamples == 0)
@@ -84,13 +84,16 @@ public:
         if(++_readIndex >= _size)
             _readIndex = 0;
             
-        return output;*/
-        
+        return output;
+    }*/
+    
+    override float getNextSample(float input) nothrow @nogc
+    {
         float xn = input;
         float yn = buffer[_readIndex];
         
         //if delay < 1 sample, interpolate between input x(n) and x(n-1)
-        if(_readIndex == _writeIndex && _delayInSamples < 1.00)
+        if(_readIndex == _writeIndex && _delayInSamples < 1.0f)
         {
             yn = xn;
         }
@@ -113,25 +116,10 @@ public:
         else
             yn = interp;
         
-        /** TODO: process each AEffect on the feedback input
-        float fb;
-        if(!_useExternalFeedback)
-            fb = _feedback;
-        else
-            fb = _feedbackIn;
-        
-        for(int i = 0; i < feedbackFX.length(); ++i){
-            fb = feedbackFX[i].getNextSample(fb);
-        }
-        
-        buffer[_writeIndex] = xn + fb * yn;
-        */
-        
-        
-        if(!_useExternalFeedback)
-            buffer[_writeIndex] = xn + _feedback * yn;
-        else
-            buffer[_writeIndex] = xn + _feedbackIn;
+        //if(!_useExternalFeedback)
+        buffer[_writeIndex] = xn + _feedback * yn;
+        //else
+        //    buffer[_writeIndex] = xn + _feedbackIn;
         
         float output = _mix * yn + (1.0 - _mix) * xn;
         
@@ -143,20 +131,37 @@ public:
         return output;
     }
     
-    //set all elements in the buffer to 0
+    //set all elements in the buffer to 0, and set indices to the top of the buffer.
     override void reset() nothrow @nogc
     {
-        //buffer[0..cast(size_t)_delayInSamples] = 0;
-        buffer[0.._size] = 0;
+        //buffer[0.._size] = 0;
+        memset(buffer, 0, _size * float.sizeof);
+        _readIndex = 0;
+        _writeIndex = 0;
     }
     
-    float getCurrentFeedbackOutput() nothrow @nogc { return _feedback * buffer[_readIndex];}
+    float getCurrentFeedbackOutput() nothrow @nogc { return _feedback * buffer[_readIndex]; }
     
-    void setCurrentFeedbackInput(float f) nothrow @nogc { _feedbackIn = f;}
+    float getFeedbackAmount() nothrow @nogc { return _feedback; }
     
-    void setUseExternalFeedback(bool b) nothrow @nogc { _useExternalFeedback = b;}
+    float getMixAmount() nothrow @nogc { return _mix; }
     
-    void addFeedbackEffect(AEffect effect) nothrow @nogc { feedbackFX.pushBack(effect);}
+    void setCurrentFeedbackInput(float f) nothrow @nogc { _feedbackIn = f; }
+    
+    void setUseExternalFeedback(bool b) nothrow @nogc { _useExternalFeedback = b; }
+    
+    void addFeedbackEffect(AEffect effect) nothrow @nogc { feedbackFX.pushBack(effect); }
+    
+    void setFeedbackAmount(float feedback) nothrow @nogc { _feedback = feedback; }
+    
+    void setMixAmount(float mix) nothrow @nogc { _mix = mix; }
+
+    override string toString()
+    {
+        import std.conv;
+        string output = "Rindex " ~ to!string(_readIndex) ~ " Windex " ~ to!string(_writeIndex);
+        return output;
+    }
     
 private:
 
@@ -182,7 +187,45 @@ unittest
 {
     import dplug.core.nogc;
     
-    DDelay d = mallocEmplace!DDelay(cast(size_t)msToSamples(2000, 44100));
-    d.initialize(44100, 1000, 0.0, 1.0);
-    testEffect(d, "DDelay", 44100 * 2);
+    DDelay d = mallocEmplace!DDelay();
+    d.initialize(44100, 2000, 1000, 0.0, 1.0);
+    testEffect(d, "DDelay", 44100 * 2, true);
 }
+
+/**override float getNextSample(float input) nothrow @nogc
+{
+    //Non-fractional delay
+    float xn = input;
+    float yn = buffer[_readIndex];
+    
+    if(_delayInSamples == 0)
+        yn = xn;
+    
+    if(!_useExternalFeedback)
+        buffer[_writeIndex] = xn + _feedback * yn;
+    else
+        buffer[_writeIndex] = xn + _feedbackIn;
+    
+    float output = _mix * yn + (1.0 - _mix) * xn;
+    
+    if(++_writeIndex >= _size)
+        _writeIndex = 0;
+    if(++_readIndex >= _size)
+        _readIndex = 0;
+        
+    return output;
+}*/
+
+/** TODO: process each AEffect on the feedback input
+float fb;
+if(!_useExternalFeedback)
+    fb = _feedback * yn;
+else
+    fb = _feedbackIn;
+
+for(int i = 0; i < feedbackFX.length(); ++i){
+    fb = feedbackFX[i].getNextSample(fb);
+}
+
+buffer[_writeIndex] = xn + fb;
+*/

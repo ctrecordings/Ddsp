@@ -49,11 +49,16 @@ unittest
 {
   import std.stdio;
 
-  float[] x = [1,3,5,12];
-  float[] y = [6,3,2,8];
+  bool runTest = false;
 
-  writefln("Functions test..");
-  writefln("x: %s", x);
-  writefln("y: %s", y);
-  writefln("Lagrange x = 11.999: %s", lagrpol(x, y, 4, 11.999));
+  if(runTest)
+  {
+    float[] x = [1,3,5,12];
+    float[] y = [6,3,2,8];
+
+    writefln("Functions test..");
+    writefln("x: %s", x);
+    writefln("y: %s", y);
+    writefln("Lagrange x = 11.999: %s", lagrpol(x, y, 4, 11.999));
+  }
 }
