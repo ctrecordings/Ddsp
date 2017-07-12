@@ -188,29 +188,34 @@ unittest
     import std.stdio;
     import std.random;
 
-    Random gen;
+    bool runTest = false;
 
-    enum indexes
+    if(runTest)
     {
-        writeIndex,
-        readIndex,
-    }
+        Random gen;
 
-    //AudioBuffer b = new AudioBuffer();
-    AudioBuffer b = mallocEmplace!AudioBuffer();
-    b.initialize(100);
-    b.clear();
+        enum indexes
+        {
+            writeIndex,
+            readIndex,
+        }
 
-    b.addIndex(0, indexes.readIndex);
-    b.addIndex(99, indexes.writeIndex);
+        //AudioBuffer b = new AudioBuffer();
+        AudioBuffer b = mallocEmplace!AudioBuffer();
+        b.initialize(100);
+        b.clear();
 
-    writeln("Buffer test...");
-    writefln("Elements: %s", b.getElements());
-    for(int i = 0; i < b.size * 2; ++i){
-        float sample = uniform(0.0L, 1.0L, gen);
-        b.write(indexes.writeIndex, sample);
-        if(i%10 == 0)
-            writef("%s ", b.read(indexes.readIndex));
-    }
-    writeln("\n...End Buffer test\n");
+        b.addIndex(0, indexes.readIndex);
+        b.addIndex(99, indexes.writeIndex);
+
+        writeln("Buffer test...");
+        writefln("Elements: %s", b.getElements());
+        for(int i = 0; i < b.size * 2; ++i){
+            float sample = uniform(0.0L, 1.0L, gen);
+            b.write(indexes.writeIndex, sample);
+            if(i%10 == 0)
+                writef("%s ", b.read(indexes.readIndex));
+        }
+        writeln("\n...End Buffer test\n");
+        }
 }

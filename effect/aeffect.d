@@ -21,6 +21,10 @@ public:
     * Should be used to free any delay elements or do any setup before play begins.
     */
     abstract void reset() nothrow @nogc;
+
+    /**
+    *
+    */
     
 protected:
     float _sampleRate;
@@ -64,27 +68,39 @@ private:
 /**
 * This function should only be called in a unittest block.
 */
-void testEffect(AEffect effect, string name, size_t bufferSize = 20000)
+void testEffect(AEffect effect, string name, size_t bufferSize = 20000, bool outputResults = false)
 {
     import std.stdio;
     import std.random;
 
     Random gen;
 
-    writefln("Testing %s..", name); 
+    if(outputResults)
+    {
+        writefln("Testing %s..", name);
+        writefln("Initial State: %s", effect.toString()); 
+    }
 
     float[] outputs;
+    string[] stringResults;
 
     for(int i = 0; i < bufferSize; ++i){
         float sample = uniform(0.0L, 1.0L, gen);
         float val = effect.getNextSample(sample);
         if(i%1000 == 0){
             outputs ~= val;
+            stringResults ~= effect.toString();
         }
     }
 
-    writeln(outputs);
-    writefln("End %s test..", name);
+    if(outputResults)
+    {
+        for(int i = 0; i < outputs.length && i < stringResults.length; ++i)
+        {
+            writefln("Output: %s ||| String: %s    ", outputs[i], stringResults[i]);
+        }
+        writefln("End %s test..", name);
+    }
 
 }
 
