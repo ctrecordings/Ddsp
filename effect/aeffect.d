@@ -107,15 +107,15 @@ void testEffect(AEffect effect, string name, size_t bufferSize = 20000, bool out
 unittest
 {
     import std.stdio;
-    import ddsp.effect.delay;
+    import ddsp.effect.digitaldelay;
 
     auto fxchain = mallocEmplace!FXChain();
 
     auto d = mallocEmplace!DigitalDelay();
-    d.initialize(2000, 0.5, 0.5);
+    d.initialize(44100, 2000, 500, 0.5, 0.5);
 
     auto d2 = mallocEmplace!DigitalDelay();
-    d2.initialize(2000, 0.1, 0.9);
+    d2.initialize(44100, 2000, 100,  0.1, 0.9);
 
     fxchain.addEffect(d);
 

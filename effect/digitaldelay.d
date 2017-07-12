@@ -2,7 +2,7 @@
 * Copyright 2017 Cut Through Recordings
 * Author(s): Ethan Reker
 */
-module ddsp.effect.ddelay;
+module ddsp.effect.digitaldelay;
 
 import ddsp.effect.aeffect;
 import ddsp.util.functions;
@@ -11,7 +11,7 @@ import ddsp.util.functions;
 * A general purpose Digital Delay with support for external feedback,
   fractional delay, and feedback path effects.
 */
-class DDelay : AEffect
+class DigitalDelay : AEffect
 {
     import core.stdc.stdlib : malloc, free;
     import core.stdc.string : memset;
@@ -49,11 +49,6 @@ public:
         reset();
         
         assert(_delayInSamples <= cast(float)_size);
-        
-        _writeIndex = 0;
-        _readIndex = _writeIndex - cast(size_t)_delayInSamples;
-        if(_readIndex < 0)
-            _readIndex += _size;
     }
     
     void setDelay(float msDelay) nothrow @nogc
@@ -62,15 +57,31 @@ public:
         assert(_delayInSamples <= cast(float)_size);
         reset();
     }
-
-    /*override float getNextSample(float input) nothrow @nogc
+    
+    override float getNextSample(float input) nothrow @nogc
     {
-        //Non-fractional delay
         float xn = input;
         float yn = buffer[_readIndex];
         
+        if(_readIndex == _writeIndex && _delayInSamples < 1.0f)
+        {
+            yn = xn;
+        }
+        
+        size_t _readIndex_1 = _readIndex - 1;
+        if(_readIndex_1 < 0)
+            _readIndex_1 = _size - 1;
+        
+        float yn_1 = buffer[_readIndex_1];
+        
+        float fracDelay = _delayInSamples - cast(int)_delayInSamples;
+        
+        float interp = linearInterp(0, 1, yn, yn_1, fracDelay);
+        
         if(_delayInSamples == 0)
             yn = xn;
+        else
+            yn = interp;
         
         if(!_useExternalFeedback)
             buffer[_writeIndex] = xn + _feedback * yn;
@@ -85,59 +96,16 @@ public:
             _readIndex = 0;
             
         return output;
-    }*/
-    
-    override float getNextSample(float input) nothrow @nogc
-    {
-        float xn = input;
-        float yn = buffer[_readIndex];
-        
-        //if delay < 1 sample, interpolate between input x(n) and x(n-1)
-        if(_readIndex == _writeIndex && _delayInSamples < 1.0f)
-        {
-            yn = xn;
-        }
-        
-        //Read the location ONE BEHIND yn at y(n-1)
-        size_t _readIndex_1 = _readIndex - 1;
-        if(_readIndex_1 < 0)
-            _readIndex_1 = _size - 1;
-        
-        //get y(n -1)
-        float yn_1 = buffer[_readIndex_1];
-        
-        //interpolate: (0, yn) and (1, yn_1) by the amount fracDelay
-        float fracDelay = _delayInSamples - cast(int)_delayInSamples;
-        
-        float interp = linearInterp(0, 1, yn, yn_1, fracDelay);
-        
-        if(_delayInSamples == 0)
-            yn = xn;
-        else
-            yn = interp;
-        
-        //if(!_useExternalFeedback)
-        buffer[_writeIndex] = xn + _feedback * yn;
-        //else
-        //    buffer[_writeIndex] = xn + _feedbackIn;
-        
-        float output = _mix * yn + (1.0 - _mix) * xn;
-        
-        if(++_writeIndex >= _size)
-            _writeIndex = 0;
-        if(++_readIndex >= _size)
-            _readIndex = 0;
-            
-        return output;
     }
     
-    //set all elements in the buffer to 0, and set indices to the top of the buffer.
+    //set all elements in the buffer to 0, and set reset indices.
     override void reset() nothrow @nogc
     {
-        //buffer[0.._size] = 0;
         memset(buffer, 0, _size * float.sizeof);
-        _readIndex = 0;
         _writeIndex = 0;
+        _readIndex = _size - cast(size_t)_delayInSamples;
+        if(_readIndex < 0)
+            _readIndex += _size;
     }
     
     float getCurrentFeedbackOutput() nothrow @nogc { return _feedback * buffer[_readIndex]; }
@@ -159,7 +127,7 @@ public:
     override string toString()
     {
         import std.conv;
-        string output = "Rindex " ~ to!string(_readIndex) ~ " Windex " ~ to!string(_writeIndex);
+        string output = "Rindex " ~ to!string(_readIndex) ~ " Windex " ~ to!string(_writeIndex) ~ " Size " ~ to!string(_size) ~ " Delay " ~ to!string(_delayInSamples);
         return output;
     }
     
@@ -187,34 +155,10 @@ unittest
 {
     import dplug.core.nogc;
     
-    DDelay d = mallocEmplace!DDelay();
+    DigitalDelay d = mallocEmplace!DigitalDelay();
     d.initialize(44100, 2000, 1000, 0.0, 1.0);
     testEffect(d, "DDelay", 44100 * 2, true);
 }
-
-/**override float getNextSample(float input) nothrow @nogc
-{
-    //Non-fractional delay
-    float xn = input;
-    float yn = buffer[_readIndex];
-    
-    if(_delayInSamples == 0)
-        yn = xn;
-    
-    if(!_useExternalFeedback)
-        buffer[_writeIndex] = xn + _feedback * yn;
-    else
-        buffer[_writeIndex] = xn + _feedbackIn;
-    
-    float output = _mix * yn + (1.0 - _mix) * xn;
-    
-    if(++_writeIndex >= _size)
-        _writeIndex = 0;
-    if(++_readIndex >= _size)
-        _readIndex = 0;
-        
-    return output;
-}*/
 
 /** TODO: process each AEffect on the feedback input
 float fb;
