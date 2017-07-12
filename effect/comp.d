@@ -1,4 +1,4 @@
-module ddsp.util.comp;
+module ddsp.effect.comp;
 
 import std.math;
 
@@ -113,6 +113,11 @@ struct Compressor
         return output;*/
         _gainReduction = 1 - yG;
         return input * yG * (1 + _mGain) * _autoGain;
+    }
+
+    float getNextSample(float input)
+    {
+        return process(input);
     }
 
     float getReductionAmount() nothrow @nogc
