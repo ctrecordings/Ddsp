@@ -5,17 +5,19 @@
 	],
 	"description": "A",
 	"copyright": "Copyright © 2017, Reker",
-	"license": "GPL",
+	"license": "LGPL-3.0",
 	"sourcePaths": [
 		"util",
 		"effect",
-		"filter"
+		"filter",
+		"osc"
 	],
 	
 	"importPaths": [
 		"util",
 		"effect",
-		"filter"
+		"filter",
+		"osc"
 	],
 
 	"dependencies": {
