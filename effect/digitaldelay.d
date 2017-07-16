@@ -57,6 +57,13 @@ public:
         assert(_delayInSamples <= cast(float)_size);
         reset();
     }
+
+    void update(float msDelay, float feedback, float mix)
+    {
+        setDelay(msDelay);
+        setFeedbackAmount(feedback);
+        setMixAmount(mix);
+    }
     
     override float getNextSample(float input) nothrow @nogc
     {

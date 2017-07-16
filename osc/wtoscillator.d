@@ -181,7 +181,6 @@ public:
                         _waveTable[i] = sin( ( cast(float)i / 1024.0) * (2 * pi));
                         break;
                 }
-                _waveTable[i] = sin( ( cast(float)i / 1024.0) * (2 * pi));
             }
         }
     }
@@ -259,5 +258,5 @@ unittest
 
     WTOscillator osc = mallocEmplace!WTOscillator();
     osc.initialize(1000, 44100, wav);
-    testEffect(osc, "WTOscillator", 44100, true);
+    testEffect(osc, "WTOscillator", 44100, false);
 }

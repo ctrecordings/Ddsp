@@ -67,3 +67,15 @@ private:
     
     bool init;
 }
+
+unittest
+{
+    import dplug.core.nogc;
+    import ddsp.effect.aeffect;
+
+    CFOscillator osc = mallocEmplace!CFOscillator;
+
+    osc.initialize(1000, 44100);
+
+    testEffect(osc, "Coupled-Form Oscillator", 20000, false);
+}

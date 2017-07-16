@@ -11,7 +11,7 @@ static immutable float half = 0.5f;
 static immutable float whole = 1;
 
 
-struct Note
+/*struct Note
 {
     float tempo;
     float length;
@@ -29,6 +29,21 @@ struct Note
     float getTimeInMinutes()
     {
         return (1 / tempo) * length;
+    }
+}*/
+struct Note
+{
+    float baseLength;
+    int multiplier;
+    
+    float getTimeInMilliseconds(float tempo)
+    {
+        return (1 / tempo) * baseLength * cast(float)multiplier * 60000;
+    }
+    
+    float getTimeInSamples(float sampleRate, float tempo)
+    {
+        return msToSamples(getTimeInMilliseconds(tempo), sampleRate);
     }
 }
 
