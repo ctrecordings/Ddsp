@@ -4,6 +4,7 @@ import std.math;
 
 import ddsp.util.envelope;
 import ddsp.util.scale;
+import ddsp.util.functions;
 
 /**
 Point for passing x y value pairs
@@ -112,7 +113,11 @@ struct Compressor
 
         return output;*/
         _gainReduction = 1 - yG;
+        //float gainLog = 1 + (1 - pow(10.0, _threshold / 20.0));
+        //float gainLog = (1 - pow(10.0, _threshold / 20.0)) * -60;
+        _autoGain = linearInterp(-60, 0, 3, 1, _threshold); 
         return input * yG * (1 + _mGain) * _autoGain;
+
     }
 
     float getNextSample(float input)
