@@ -1,7 +1,7 @@
 /**
-https://www.kvraudio.com/forum/viewtopic.php?t=278736
-https://github.com/vinniefalco/DSPFilters/blob/4677dd7555eed12ad126c24b42a04cc887877925/shared/DSPFilters/include/DspFilters/State.h
-https://www.kvraudio.com/forum/viewtopic.php?t=479651
+* Copyright 2017 Cut Through Recordings
+* License: MIT License
+* Author(s): Ethan Reker
 */
 module ddsp.filter.allpass;
 
@@ -119,4 +119,9 @@ for i in range(0, 1000):
     if Mod(i, 10) == 0:
         print "Input: " + str(inp)
         print "Output: " + str(out)
+*/
+/**
+https://www.kvraudio.com/forum/viewtopic.php?t=278736
+https://github.com/vinniefalco/DSPFilters/blob/4677dd7555eed12ad126c24b42a04cc887877925/shared/DSPFilters/include/DspFilters/State.h
+https://www.kvraudio.com/forum/viewtopic.php?t=479651
 */

@@ -1,3 +1,8 @@
+/**
+* Copyright 2017 Cut Through Recordings
+* License: MIT License
+* Author(s): Ethan Reker
+*/
 module ddsp.effect.aeffect;
 
 import dplug.core.alignedbuffer;

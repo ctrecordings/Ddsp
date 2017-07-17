@@ -1,3 +1,8 @@
+/**
+* Copyright 2017 Cut Through Recordings
+* License: MIT License
+* Author(s): Ethan Reker
+*/
 module cfoscillator.d;
 
 import ddsp.effect.aeffect;

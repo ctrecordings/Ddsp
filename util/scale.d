@@ -1,6 +1,7 @@
 /**
-A set of classes for converting between ranges of real values.  Calculating the
-coefficents and storing them saves processing time later.
+* Copyright 2017 Cut Through Recordings
+* License: MIT License
+* Author(s): Ethan Reker
 */
 module ddsp.util.scale;
 
