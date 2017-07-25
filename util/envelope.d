@@ -83,6 +83,8 @@ struct EnvelopeDetector
         return _envelope;
     }
 
+    void notPlaying() nothrow @nogc {_envelope /= 1.1;}
+
     /**
     For unittesting purposes
     */

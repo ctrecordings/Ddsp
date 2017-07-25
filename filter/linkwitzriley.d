@@ -46,8 +46,11 @@ struct LinkwitzRiley
 
     void setFrequency(float frequency) nothrow @nogc
     {
-        _frequency = frequency;
-        calculateCoefficients();
+        if(_frequency != frequency)
+        {
+            _frequency = frequency;
+            calculateCoefficients();
+        }
     }
 
     void setSampleRate(float sampleRate) nothrow @nogc

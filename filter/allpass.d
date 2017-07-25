@@ -24,9 +24,14 @@ struct Allpass
 
     float yn;
 
+    float _frequency;
+    float _sampleRate;
+
     void initialize(float frequency, float sampleRate, float q = 0.707) nothrow @nogc
     {
-        float w0 = 2 * pi * frequency / sampleRate;
+        _frequency = frequency;
+        _sampleRate = sampleRate;
+        float w0 = 2 * pi * _frequency / _sampleRate;
         float cs = cos(w0);
         float sn = sin(w0);
         float AL = sn / (2 * q);
@@ -48,6 +53,12 @@ struct Allpass
         w1 = w;
 
         return yn;
+    }
+
+    void setFrequency(float frequency) nothrow @nogc
+    {
+        if(_frequency != frequency)
+            initialize(frequency, _sampleRate);
     }
 }
 
