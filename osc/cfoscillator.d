@@ -78,7 +78,7 @@ unittest
     import dplug.core.nogc;
     import ddsp.effect.aeffect;
 
-    CFOscillator osc = mallocEmplace!CFOscillator;
+    CFOscillator osc = mallocNew!CFOscillator;
 
     osc.initialize(1000, 44100);
 

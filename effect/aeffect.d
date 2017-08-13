@@ -41,7 +41,7 @@ public:
 
     this()
     {
-        _fxChain = makeAlignedBuffer!AEffect();
+        _fxChain = makeVec!AEffect();
     }
     
     void addEffect(AEffect effect)
@@ -67,7 +67,7 @@ public:
     }
 
 private:
-    AlignedBuffer!AEffect _fxChain;
+    Vec!AEffect _fxChain;
 }
 
 /**

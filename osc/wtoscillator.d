@@ -261,7 +261,7 @@ unittest
     import dplug.core.nogc;
     import ddsp.effect.aeffect;
 
-    WTOscillator osc = mallocEmplace!WTOscillator();
+    WTOscillator osc = mallocNew!WTOscillator();
     osc.initialize(1000, 44100, wav);
     testEffect(osc, "WTOscillator", 44100, false);
 }
