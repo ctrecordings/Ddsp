@@ -59,7 +59,7 @@ class BufferIndex
 }
 
 /**
-TODO: Add separate AlignedBuffers for read and write indexes so that they can
+TODO: Add separate Vecs for read and write indexes so that they can
 all be shifted equally on resize operations.
 */
 class AudioBuffer
@@ -71,7 +71,7 @@ class AudioBuffer
     */
     void initialize(size_t size)
     {
-        _indexList = makeAlignedBuffer!BufferIndex();
+        _indexList = makeVec!BufferIndex();
         buffer = cast(float*) malloc(size * float.sizeof);
         _sudoLength = size;
         _size = size;
@@ -87,7 +87,7 @@ class AudioBuffer
     */
     void addIndex(ulong startingPosition, int id)
     {
-        BufferIndex newIndex = mallocEmplace!BufferIndex(cast(uint) startingPosition, _sudoLength, id);
+        BufferIndex newIndex = mallocNew!BufferIndex(cast(uint) startingPosition, _sudoLength, id);
         _indexList.pushBack(newIndex);
     }
 
@@ -180,7 +180,7 @@ class AudioBuffer
     
     size_t _sudoLength;
     
-    AlignedBuffer!BufferIndex _indexList;
+    Vec!BufferIndex _indexList;
 }
 
 unittest
@@ -201,7 +201,7 @@ unittest
         }
 
         //AudioBuffer b = new AudioBuffer();
-        AudioBuffer b = mallocEmplace!AudioBuffer();
+        AudioBuffer b = mallocNew!AudioBuffer();
         b.initialize(100);
         b.clear();
 

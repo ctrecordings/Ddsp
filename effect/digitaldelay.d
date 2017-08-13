@@ -31,7 +31,7 @@ public:
         _readIndex = 0;
         _writeIndex = 0;
         
-        feedbackFX = makeAlignedBuffer!AEffect;
+        feedbackFX = makeVec!AEffect;
     }
     
     ~this() nothrow @nogc { free(buffer); }
@@ -156,7 +156,7 @@ private:
     bool _useExternalFeedback;
     float _feedbackIn;
     
-    AlignedBuffer!AEffect feedbackFX;
+    Vec!AEffect feedbackFX;
 }
 
 unittest
