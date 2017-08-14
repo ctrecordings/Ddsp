@@ -136,16 +136,16 @@ struct Compressor
     }
 
     void autoGainEnabled(bool enabled) nothrow @nogc
-{
-    if(enabled)
     {
-        _autoGain = linearInterp(-60, 0, 3, 1, _threshold); 
+        if(enabled)
+        {
+            _autoGain = linearInterp(-60, 0, 3, 1, _threshold); 
+        }
+        else
+        {
+            _autoGain = 1.0f;
+        }
     }
-    else
-    {
-        _autoGain = 1.0f;
-    }
-}
 }
 
 unittest
