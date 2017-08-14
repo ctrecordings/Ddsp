@@ -120,7 +120,7 @@ struct Compressor
         _gainReduction = 1 - yG;
         //float gainLog = 1 + (1 - pow(10.0, _threshold / 20.0));
         //float gainLog = (1 - pow(10.0, _threshold / 20.0)) * -60;
-        _autoGain = linearInterp(-60, 0, 3, 1, _threshold); 
+        
         return input * yG * (1 + _mGain) * _autoGain;
 
     }
@@ -134,6 +134,18 @@ struct Compressor
     {
         return _gainReduction;
     }
+
+    void autoGainEnabled(bool enabled) nothrow @nogc
+{
+    if(enabled)
+    {
+        _autoGain = linearInterp(-60, 0, 3, 1, _threshold); 
+    }
+    else
+    {
+        _autoGain = 1.0f;
+    }
+}
 }
 
 unittest
