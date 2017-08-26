@@ -56,10 +56,9 @@ public:
     {
         _delayInSamples = msToSamples(msDelay, _sampleRate);
         assert(_delayInSamples <= cast(float)_size);
-        reset();
     }
 
-    void update(float msDelay, float feedback, float mix)
+    void update(float msDelay, float feedback, float mix) nothrow @nogc
     {
         setDelay(msDelay);
         setFeedbackAmount(feedback);
@@ -94,7 +93,7 @@ public:
         if(!_useExternalFeedback)
             buffer[_writeIndex] = xn + _feedback * yn;
         else
-            buffer[_writeIndex] = xn + _feedbackIn;
+            buffer[_writeIndex] = xn + _feedbackIn * _feedback;
         
         float output = _mix * yn + (1.0 - _mix) * xn;
         
@@ -139,7 +138,7 @@ public:
         return output;
     }
     
-private:
+protected:
 
     float *buffer;
     float _sampleRate;
