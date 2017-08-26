@@ -1,11 +1,11 @@
 {
-	"name": "ddsp",
+    "name": "ddsp",
+    "copyright": "Copyright © 2017 Cut Through Recordings",
 	"authors": [
 		"Ethan Reker"
 	],
-	"description": "A",
-	"copyright": "Copyright © 2017, Reker",
-	"license": "LGPL-3.0",
+	"description": "A small library for digital signal processing in D",
+	"license": "MIT",
 	"sourcePaths": [
 		"util",
 		"effect",
@@ -18,9 +18,44 @@
 		"effect",
 		"filter",
 		"osc"
-	],
+    ],
+    
+    "subPackages": [
+        {
+            "name": "effect",
+            "sourcePaths": ["effect/ddsp/effect"],
+            "importPaths": ["effect"],
+            "dependencies": {
+                "dplug:core": "*"
+            }
+        },
+        {
+            "name": "filter",
+            "sourcePaths": ["filter/ddsp/filter"],
+            "importPaths": ["filter"],
+            "dependencies": {
+                "dplug:core": "*"
+            }
+        },
+        {
+            "name": "util",
+            "sourcePaths": ["util/ddsp/util"],
+            "importPaths": ["osc"],
+            "dependencies": {
+                "dplug:core": "*"
+            }
+        },
+        {
+            "name": "osc",
+            "sourcePaths": ["osc/ddsp/osc"],
+            "importPaths": ["osc"],
+            "dependencies": {
+                "dplug:core": "*"
+            }
+        }
+    ],
 
-	"dependencies": {
-		"dplug:core": "~>4.0"
-	}
+    "dependencies": {
+        "dplug:core": "~4.0"
+    }
 }
