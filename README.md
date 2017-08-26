@@ -1,4 +1,4 @@
-# Ddsp
+# Ddsp [![Dub version](https://img.shields.io/dub/v/ddsp.svg)](https://code.dlang.org/packages/ddsp)
 A high level library for Digital Signal Processing in D with a focus on audio.
 
 ### Components
