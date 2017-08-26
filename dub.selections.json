@@ -1,7 +1,7 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"dplug": "4.6.6",
+		"dplug": "4.6.7",
 		"gfm": "6.2.10",
 		"pfft": "1.0.0"
 	}
