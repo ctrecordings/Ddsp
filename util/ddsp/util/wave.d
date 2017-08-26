@@ -6,7 +6,7 @@ import std.stdio;
 
 ///
 /// Class for reading and extracting data from files in WAVE format.
-/// Currently only 16bit files are supported
+/// Currently only 16bit mono files are supported
 ///
 class WaveFile
 {
@@ -26,18 +26,17 @@ class WaveFile
         subChunk2Size = bytesToInt(data[40..44]);
 
         leftChannel = mallocSlice!float(chunkSize / (numChannels * blockAlign));
-        rightChannel = mallocSlice!float(chunkSize / (numChannels * blockAlign));
         uint sampleNum;
         for(int i = 44; i < data.length; i += numChannels * blockAlign, ++sampleNum)
         {
             leftChannel[sampleNum] = convertSampleData(data[i..i+blockAlign]);
-            rightChannel[sampleNum] = convertSampleData(data[i+blockAlign..i+blockAlign * 2]);
-
         }
 
     }
 
-    ubyte[] getData() nothrow @nogc {return data[];}
+    float[] getSampleData() nothrow @nogc {return leftChannel[];}
+
+
 
     override string toString()
     {
@@ -94,8 +93,6 @@ private:
         }
         //take two's compliment
         0x8000 & sum ? sum = cast(int)(0x7FFF & sum) - 0x8000 : sum = sum;
-        //return sum / 2;
-        //return (cast(float)sum - 8388608.0f) / 8388608.0f;
         return sum / 32768.0f;
     }
 }
@@ -104,8 +101,7 @@ unittest
 {
     import std.stdio;
 
-    WaveFile file = new WaveFile("D:/Google Drive/PROGRAMMING/Git Repos/Ddsp/util/8bitexample.wav");
+    WaveFile file = new WaveFile("util/ddsp/util/8bitexample.wav");
     writeln(file.toString());
+    writeln(file.getSampleData()[0..1000]);
 }
-
-//24-bit range -8,388,608 to 8388,607
