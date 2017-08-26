@@ -4,9 +4,13 @@ import dplug.core.file;
 import dplug.core.nogc;
 import std.stdio;
 
+///
+/// Class for reading and extracting data from files in WAVE format.
+/// Currently only 16bit files are supported
+///
 class WaveFile
 {
-    this(const(char)[] filename)
+    this(const(char)[] filename) nothrow @nogc
     {
         data = readFile(filename);
         chunkDescriptor = cast(char[4])data[0..4];
@@ -33,41 +37,25 @@ class WaveFile
 
     }
 
-    ubyte[] getData(){return data[];}
+    ubyte[] getData() nothrow @nogc {return data[];}
 
-    uint bytesToInt(ubyte[] bytes)
+    override string toString()
     {
-        if(bytes.length == 4)
-        {
-            return (bytes[3] << 24) 
-                | (bytes[2] << 16)
-                | (bytes[1] << 8)
-                | bytes[0];
-        }
-        else if(bytes.length == 2)
-        {
-            return (bytes[1] << 8) | bytes[0];
-        }
-        else
-        {
-            return 0;
-        }
+        import std.conv;
+        return   "Chunk Descriptor: " ~ to!string(chunkDescriptor)
+               ~ "\nChunk Size: " ~ to!string(chunkSize)
+               ~ "\nSub Chunk1 Size: " ~ to!string(subChunk1Size) 
+               ~ "\nAudio Format: " ~ to!string(audioFormat)
+               ~ "\nNum Channels: " ~ to!string(numChannels)
+               ~ "\nSample Rate: " ~ to!string(sampleRate)
+               ~ "\nByte Rate: " ~ to!string(byteRate)
+               ~ "\nBlock Align: " ~ to!string(blockAlign)
+               ~ "\nBits Per Sample: " ~ to!string(bitsPerSample)
+               ~ "\nData Sub Chuck: " ~ to!string(bitsPerSample)
+               ~ "\nSub Chunk2 Size: " ~ to!string(subChunk2Size);
     }
 
-    float convertSampleData(ubyte[] bytes)
-    {
-        int sum = bytes[0];
-        for(int i = 1; i < bytes.length; ++i){
-            sum |= cast(int)bytes[i] << (8 * i);
-        }
-        //take two's compliment
-        0x8000 & sum ? sum = cast(int)(0x7FFF & sum) - 0x8000 : sum = sum;
-        //return sum / 2;
-        //return (cast(float)sum - 8388608.0f) / 8388608.0f;
-        return sum / 32768.0f;
-    }
-
-public:
+private:
 
     //RIFF
     char[4] chunkDescriptor;
@@ -87,6 +75,29 @@ public:
     ubyte[] data;
     float[] leftChannel;
     float[] rightChannel;
+
+    uint bytesToInt(ubyte[] bytes) nothrow @nogc
+    {
+        uint sum = bytes[0];
+        for(int i = 1; i < bytes.length; ++i)
+        {
+            sum |= bytes[i] << (i *8);
+        }
+        return sum;
+    }
+
+    float convertSampleData(ubyte[] bytes) nothrow @nogc
+    {
+        int sum = bytes[0];
+        for(int i = 1; i < bytes.length; ++i){
+            sum |= cast(int)bytes[i] << (8 * i);
+        }
+        //take two's compliment
+        0x8000 & sum ? sum = cast(int)(0x7FFF & sum) - 0x8000 : sum = sum;
+        //return sum / 2;
+        //return (cast(float)sum - 8388608.0f) / 8388608.0f;
+        return sum / 32768.0f;
+    }
 }
 
 unittest
@@ -94,20 +105,7 @@ unittest
     import std.stdio;
 
     WaveFile file = new WaveFile("D:/Google Drive/PROGRAMMING/Git Repos/Ddsp/util/8bitexample.wav");
-    //writeln(file.getData());
-    writeln(file.chunkDescriptor);
-    writeln(file.chunkSize);
-    writeln(file.subChunk1Size);
-    writeln(file.audioFormat);
-    writeln(file.numChannels);
-    writeln(file.sampleRate);
-    writeln(file.byteRate);
-    writeln(file.blockAlign);
-    writeln(file.bitsPerSample);
-    writeln(file.dataSubChunk);
-    writeln(file.subChunk2Size);
-    writeln(file.sample1);
-    writeln(file.leftChannel);
+    writeln(file.toString());
 }
 
 //24-bit range -8,388,608 to 8388,607
