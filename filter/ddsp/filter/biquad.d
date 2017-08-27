@@ -5,6 +5,8 @@
 */
 module ddsp.filter.biquad;
 
+import ddsp.effect.aeffect;
+
 const float pi = 3.14159265;
 
 enum FilterType
@@ -21,7 +23,7 @@ enum FilterType
 /**
 This class implements a generic biquad filter. Should be inherited by all filters.
 */
-class BiQuad
+class BiQuad : AEffect
 {
     public:
 
@@ -47,7 +49,7 @@ class BiQuad
            _d0 = d0;
         }
 
-        float getNextSample(float input)  nothrow @nogc
+        override float getNextSample(float input)  nothrow @nogc
         {
             float output = (_a0 * input + _a1 * _xn1 + _a1 * _xn2 - _b1 * _yn1 - _b2 * _yn2) * _c0 + (input * _d0);
 
@@ -57,6 +59,14 @@ class BiQuad
             _yn1 = output;
 
             return output;
+        }
+
+        override void reset()
+        {
+            _xn1 = 0;
+            _xn2 = 0;
+            _yn1 = 0;
+            _yn2 = 0;
         }
 
     protected:
@@ -73,6 +83,14 @@ class BiQuad
         float _sampleRate;
         float _qFactor;
         float _frequency;
+}
 
-        void calculateCoefficients()  nothrow @nogc {}
+unittest
+{
+    import dplug.core.nogc;
+
+    BiQuad f = mallocNew!BiQuad();
+    f.setSampleRate(44100);
+    f.initialize(0.1, 0.3, 0.5, 0,5, 0.1);
+    testEffect(f, "BiQuad", 44100 * 2, false);
 }

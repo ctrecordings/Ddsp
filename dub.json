@@ -48,14 +48,10 @@
         {
             "name": "osc",
             "sourcePaths": ["osc/ddsp/osc"],
-            "importPaths": ["osc"],
-            "dependencies": {
-                "dplug:core": "*"
-            }
+            "importPaths": ["osc"]
         }
     ],
-
     "dependencies": {
-        "dplug:core": "~4.0"
+        "dplug:core": "~>5.0.1"
     }
 }

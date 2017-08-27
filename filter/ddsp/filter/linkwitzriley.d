@@ -13,7 +13,7 @@ corner frequency.  These filters are great for multiband processing since a
 highpass and lowpass with the same frequency will sum to a flat frequency
 response.
 */
-struct LinkwitzRiley
+class LinkwitzRiley : BiQuad
 {
     private import std.math;
     private import ddsp.filter.biquad;
@@ -32,7 +32,7 @@ struct LinkwitzRiley
         calculateCoefficients();
     }
 
-    float getNextSample(float input)  nothrow @nogc
+    override float getNextSample(float input)  nothrow @nogc
     {
         float output = _a0 * input + _a1 * _xn1 + _a2 * _xn2 - _b1 * _yn1 - _b2 * _yn2;
 
@@ -53,7 +53,7 @@ struct LinkwitzRiley
         }
     }
 
-    void setSampleRate(float sampleRate) nothrow @nogc
+    override void setSampleRate(float sampleRate) nothrow @nogc
     {
         _sampleRate = sampleRate;
         calculateCoefficients();
@@ -100,4 +100,15 @@ struct LinkwitzRiley
         _b1 = (-2 * _kappa * _kappa + 2 * _omega * _omega) / _delta;
         _b2 = (-2 * _kappa * _omega + _kappa * _kappa + _omega * _omega) / _delta;
     }
+}
+
+unittest
+{
+    import dplug.core.nogc;
+    import ddsp.effect.aeffect;
+    
+     LinkwitzRiley f = mallocNew! LinkwitzRiley();
+    f.setSampleRate(44100);
+    f.setFrequency(10000);
+    testEffect(f, " LinkwitzRiley", 44100 * 2, true);
 }
