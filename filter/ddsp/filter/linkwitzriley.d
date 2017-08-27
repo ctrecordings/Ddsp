@@ -106,9 +106,9 @@ unittest
 {
     import dplug.core.nogc;
     import ddsp.effect.aeffect;
-    
+
      LinkwitzRiley f = mallocNew! LinkwitzRiley();
     f.setSampleRate(44100);
     f.setFrequency(10000);
-    testEffect(f, " LinkwitzRiley", 44100 * 2, true);
+    testEffect(f, " LinkwitzRiley", 44100 * 2, false);
 }
