@@ -9,3 +9,4 @@ dub.selections.json
 *.suo
 *.so 
 *.sh
+ddsp-test-library
