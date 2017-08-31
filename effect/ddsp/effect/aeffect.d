@@ -30,6 +30,11 @@ public:
     /**
     *
     */
+    void setSampleRate(float sampleRate)
+    {
+        _sampleRate = sampleRate;
+        reset();
+    }
     
 protected:
     float _sampleRate;

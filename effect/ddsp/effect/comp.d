@@ -10,6 +10,7 @@ import std.math;
 import ddsp.util.envelope;
 import ddsp.util.scale;
 import ddsp.util.functions;
+import ddsp.effect.aeffect;
 
 /**
 Point for passing x y value pairs
@@ -24,35 +25,21 @@ struct P
 Uses polynomial interpolation to fit the curve of the knee.
 The points should be calculated and passed to the function.
 */
-float kneeInterpolation(P p0, P p1, P p2, float input) nothrow @nogc
+float kneeInterpolation(P _p0, P _p1, P _p2, float input) nothrow @nogc
 {
-    float t = abs(input - p0.x)/(p2.x - p0.x);
-    float output = (1 - t) * (1 - t) * p0.y + 2 * (1 - t) * t * p1.y + t * t * p2.y;
+    float t = abs(input - _p0.x)/(_p2.x - _p0.x);
+    float output = (1 - t) * (1 - t) * _p0.y + 2 * (1 - t) * t * _p1.y + t * t * _p2.y;
     return output;
 }
 
-struct Compressor
+class Compressor : AEffect
 {
-    EnvelopeDetector detector;
-    LogToLinearScale scale = new LogToLinearScale();
 
-    float _knee;
-    float _kneeWidth;
-    float _threshold;
-    float _ratio;
-    float _mGain;
-    float _gainReduction;
-    float _autoGain;
+public:
 
-    float _a;
-    float _b;
-    P p0;
-    P p1;
-    P p2;
-
-    void initialize(float sampleRate, float attTime, float relTime, float knee, float threshold, float ratio, float mGain)  nothrow @nogc
+    void initialize(float attTime, float relTime, float knee, float threshold, float ratio, float mGain)  nothrow @nogc
     {
-        detector.initialize(sampleRate, attTime, relTime, true, DetectorType.peak);
+        detector.initialize(_sampleRate, attTime, relTime, true, DetectorType.peak);
         _knee = knee;
         _threshold = threshold;
         _autoGain = 2 - pow(10.0, threshold/20.0);
@@ -80,14 +67,14 @@ struct Compressor
         _a = 1 / _ratio;
         _b = _threshold  - _a * _threshold;
 
-        p0.x = _threshold - (_kneeWidth/2);
-        p0.y = p0.x;
+        _p0.x = _threshold - (_kneeWidth/2);
+        _p0.y = _p0.x;
 
-        p1.x = _threshold;
-        p1.y = p0.x;
+        _p1.x = _threshold;
+        _p1.y = _p0.x;
 
-        p2.x = _threshold + (_kneeWidth/2);
-        p2.y = _a * p2.x + _b;
+        _p2.x = _threshold + (_kneeWidth/2);
+        _p2.y = _a * _p2.x + _b;
     }
 
     float process(float input)  nothrow @nogc
@@ -107,7 +94,7 @@ struct Compressor
         if(detectorValue >= _threshold + _kneeWidth)
             gainVal = _a * detectorValue + _b;
         else if(detectorValue >= _threshold - _kneeWidth)
-            gainVal = kneeInterpolation(p0, p1, p2, detectorValue);
+            gainVal = kneeInterpolation(_p0, _p1, _p2, detectorValue);
         else
             gainVal = 1;
 
@@ -125,7 +112,7 @@ struct Compressor
 
     }
 
-    float getNextSample(float input)
+    override float getNextSample(float input)
     {
         return process(input);
     }
@@ -146,22 +133,37 @@ struct Compressor
             _autoGain = 1.0f;
         }
     }
+
+    override void reset()
+    {
+
+    }
+
+private:
+    EnvelopeDetector detector;
+    LogToLinearScale scale = new LogToLinearScale();
+
+    float _knee;
+    float _kneeWidth;
+    float _threshold;
+    float _ratio;
+    float _mGain;
+    float _gainReduction;
+    float _autoGain;
+
+    float _a;
+    float _b;
+    P _p0;
+    P _p1;
+    P _p2;
 }
 
 unittest
 {
-    /*import std.random;
-    import std.stdio;
+    import dplug.core.nogc;
 
-    Random gen;
-
-    Compressor c;
-    c.initialize(44100, 10, 100, 0.5f, 0.1f, 4, 0.0f);
-
-    for(int i = 0; i < 44100; ++i){
-        float sample = uniform(0.0L, 1.0L, gen) * pow(-1, i);
-        float output = c.process(sample);
-        if(i % 1001 == 0)
-            writefln("Input: %s  |  Output: %s  |  Reduction: %s", sample, output, c.getReductionAmount());
-    }*/
+    Compressor f = mallocNew!Compressor();
+    f.setSampleRate(44100);
+    f.initialize(500, 200, 0.5, 0.3, 4, 1.0);
+    testEffect(f, "Compressor", 44100 * 2, true);
 }
