@@ -36,26 +36,27 @@ public:
     
     ~this() nothrow @nogc { free(buffer); }
     
-    void initialize(float sampleRate, float maxSizeMS, float delayInMS, float feedback, float mix) nothrow @nogc
+    void initialize(float sampleRate) nothrow @nogc
     {
         _sampleRate = sampleRate;
-        _feedback = feedback;
-        _mix = mix;
-        _delayInSamples = msToSamples(delayInMS, _sampleRate);
-        
-        //Create buffer if null and reset it to 0
-        _size = cast(size_t)msToSamples(maxSizeMS, _sampleRate);
-        if(buffer == null)
-            buffer = cast(float*) malloc(_size * float.sizeof);
+        _feedback = 0;
+        _mix = 0;
+        _size = cast(uint)sampleRate * 2;
+
+        if(buffer != null)
+            free(buffer);
+
+        buffer = cast(float*) malloc(_size * float.sizeof);
         reset();
-        
-        assert(_delayInSamples <= cast(float)_size);
     }
     
     void setDelay(float msDelay) nothrow @nogc
     {
         _delayInSamples = msToSamples(msDelay, _sampleRate);
-        assert(_delayInSamples <= cast(float)_size);
+        //assert(_delayInSamples <= cast(float)_size);
+        if(_prevDelay != _delayInSamples)
+            reset();
+        _prevDelay = _delayInSamples;
     }
 
     void update(float msDelay, float feedback, float mix) nothrow @nogc
@@ -108,7 +109,8 @@ public:
     //set all elements in the buffer to 0, and set reset indices.
     override void reset() nothrow @nogc
     {
-        memset(buffer, 0, _size * float.sizeof);
+		memset(buffer, 0, _size * float.sizeof);
+
         _writeIndex = 0;
         _readIndex = _size - cast(size_t)_delayInSamples;
         if(_readIndex < 0)
@@ -148,6 +150,7 @@ protected:
     size_t _size;
     float _delayInSamples;
     float _delayInMS;
+    float _prevDelay;
     
     size_t _writeIndex;
     size_t _readIndex;
@@ -156,6 +159,9 @@ protected:
     float _feedbackIn;
     
     Vec!AEffect feedbackFX;
+
+    float maxDelayTime = 3.0f;
+
 }
 
 unittest

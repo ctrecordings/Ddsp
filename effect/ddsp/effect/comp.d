@@ -70,7 +70,7 @@ struct Compressor
         detector.setReleaseTime(relTime);
         _knee = knee;
         _threshold = threshold;
-        _autoGain = 2 - pow(10.0, threshold/20.0);
+        _autoGain = 1.8 - pow(10.0, threshold/20.0);
         _mGain = mGain;
         _ratio = ratio;
     }
