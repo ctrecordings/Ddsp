@@ -15,7 +15,4 @@ d:
  - dmd-2.073.1
  - dmd-2.072.1
  
- - dub test --compiler=${DC} ddsp:effect
- - dub test --compiler=${DC} ddsp:util
- - dub test --compiler=${DC} ddsp:osc
- - dub test --compiler=${DC} ddsp:filter
+ dub test --compiler=${DC}
