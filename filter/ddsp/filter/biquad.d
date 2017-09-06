@@ -48,6 +48,21 @@ class BiQuad : AEffect
            _c0 = c0;
            _d0 = d0;
         }
+        
+        void setFrequency(float frequency) nothrow @nogc
+        {
+            if(_frequency != frequency)
+            {
+                _frequency = frequency;
+                calcCoefficients();
+            }
+        }
+    
+        override void setSampleRate(float sampleRate) nothrow @nogc
+        {
+            _sampleRate = sampleRate;
+            calcCoefficients();
+        }
 
         override float getNextSample(float input)  nothrow @nogc
         {
@@ -83,14 +98,16 @@ class BiQuad : AEffect
         float _sampleRate;
         float _qFactor;
         float _frequency;
+        
+        abstract void calcCoefficients() nothrow @nogc;
 }
 
 unittest
 {
     import dplug.core.nogc;
 
-    BiQuad f = mallocNew!BiQuad();
-    f.setSampleRate(44100);
-    f.initialize(0.1, 0.3, 0.5, 0,5, 0.1);
-    testEffect(f, "BiQuad", 44100 * 2, false);
+    //BiQuad f = mallocNew!BiQuad();
+    //f.setSampleRate(44100);
+    //f.initialize(0.1, 0.3, 0.5, 0,5, 0.1);
+    //testEffect(f, "BiQuad", 44100 * 2, false);
 }

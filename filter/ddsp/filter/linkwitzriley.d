@@ -44,21 +44,6 @@ class LinkwitzRiley : BiQuad
         return output;
     }
 
-    void setFrequency(float frequency) nothrow @nogc
-    {
-        if(_frequency != frequency)
-        {
-            _frequency = frequency;
-            calculateCoefficients();
-        }
-    }
-
-    override void setSampleRate(float sampleRate) nothrow @nogc
-    {
-        _sampleRate = sampleRate;
-        calculateCoefficients();
-    }
-
     private:
 
     float _theta;
