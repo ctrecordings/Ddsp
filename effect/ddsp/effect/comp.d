@@ -11,6 +11,7 @@ import ddsp.util.envelope;
 import ddsp.util.scale;
 import ddsp.util.functions;
 import ddsp.effect.aeffect;
+import dplug.dsp.envelope;
 
 /**
 Point for passing x y value pairs
@@ -36,10 +37,23 @@ class Compressor : AEffect
 {
 
 public:
-
-    void initialize(float attTime, float relTime, float knee, float threshold, float ratio, float mGain)  nothrow @nogc
+    this() nothrow @nogc
     {
-        detector.initialize(_sampleRate, attTime, relTime, true, DetectorType.peak);
+        _knee = 0;
+        _kneeWidth = 0;
+        _threshold = 0;
+        _ratio = 0;
+        _mGain = 0;
+        _gainReduction = 0;
+        _autoGain = 0;
+
+        _a = 0;
+        _b = 0;
+    }
+
+    void initialize(float sampleRate, float attTime, float relTime, float knee, float threshold, float ratio, float mGain)  nothrow @nogc
+    {
+        detector.initialize(sampleRate, attTime, relTime, true, DetectorType.peak);
         _knee = knee;
         _threshold = threshold;
         _autoGain = 2 - pow(10.0, threshold/20.0);
@@ -86,27 +100,8 @@ public:
         float yG = CS * (_threshold - detectorVal);
         0 < yG ? yG = 0 : yG = yG;
         yG = pow(10.0, yG/20.0);
-        /*float output = 0;
-        float detectorValue = scale.convert(detector.detect(input));
-        //float detectorValue = 0.9f;
-        float gainVal;
 
-        if(detectorValue >= _threshold + _kneeWidth)
-            gainVal = _a * detectorValue + _b;
-        else if(detectorValue >= _threshold - _kneeWidth)
-            gainVal = kneeInterpolation(_p0, _p1, _p2, detectorValue);
-        else
-            gainVal = 1;
-
-        output = input * gainVal;
-
-        if(abs(output) < abs(input))
-            _gainReduction = abs(input) - abs(output);
-
-        return output;*/
         _gainReduction = 1 - yG;
-        //float gainLog = 1 + (1 - pow(10.0, _threshold / 20.0));
-        //float gainLog = (1 - pow(10.0, _threshold / 20.0)) * -60;
         
         return input * yG * (1 + _mGain) * _autoGain;
 
@@ -142,6 +137,7 @@ public:
 private:
     EnvelopeDetector detector;
     LogToLinearScale scale = new LogToLinearScale();
+    CoarseRMS!float rmsDetector;
 
     float _knee;
     float _kneeWidth;

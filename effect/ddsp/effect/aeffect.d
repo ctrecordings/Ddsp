@@ -30,7 +30,7 @@ public:
     /**
     *
     */
-    void setSampleRate(float sampleRate)
+    void setSampleRate(float sampleRate) nothrow @nogc
     {
         _sampleRate = sampleRate;
         reset();
