@@ -56,12 +56,14 @@ class BiQuad : AEffect
                 _frequency = frequency;
                 calcCoefficients();
             }
+            reset();
         }
     
         override void setSampleRate(float sampleRate) nothrow @nogc
         {
             _sampleRate = sampleRate;
             calcCoefficients();
+            reset();
         }
 
         override float getNextSample(float input)  nothrow @nogc
@@ -84,6 +86,8 @@ class BiQuad : AEffect
             _yn2 = 0;
         }
 
+        abstract void calcCoefficients() nothrow @nogc;
+
     protected:
 
         //Delay samples
@@ -98,8 +102,6 @@ class BiQuad : AEffect
         float _sampleRate;
         float _qFactor;
         float _frequency;
-        
-        abstract void calcCoefficients() nothrow @nogc;
 }
 
 unittest

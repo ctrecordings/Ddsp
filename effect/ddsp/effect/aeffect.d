@@ -119,7 +119,7 @@ unittest
     import std.stdio;
     import ddsp.effect.digitaldelay;
 
-    auto fxchain = mallocEmplace!FXChain();
+    /*auto fxchain = mallocEmplace!FXChain();
 
     auto d = mallocEmplace!DigitalDelay();
     d.initialize(44100, 2000, 500, 0.5, 0.5);
@@ -129,5 +129,5 @@ unittest
 
     fxchain.addEffect(d);
 
-    testEffect(fxchain, "FX Chain");
+    testEffect(fxchain, "FX Chain");*/
 }
