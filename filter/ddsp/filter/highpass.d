@@ -5,32 +5,34 @@
 */
 module ddsp.filter.highpass;
 
+import ddsp.filter.biquad;
 import std.math;
 
 /// First order highpass filter
-class HighpassO1(T) : BiQuad
+class HighpassO1 : BiQuad
 {
-private:
-    T _thetac;
-    T _gamma;
-    
-    override void calcCoefficients()
+public:
+    override void calcCoefficients() nothrow @nogc
     {
         _thetac = 2 * PI * _frequency / _sampleRate;
-        _gamma = cos(thetac) / (1 + sin(thetac));
-        _a0 = (1 + gamma) / 2;
+        _gamma = cos(_thetac) / (1 + sin(_thetac));
+        _a0 = (1 + _gamma) / 2;
         _a1 = -_a0;
         _a2 = 0.0;
-        _b1 = -gamma;
+        _b1 = -_gamma;
         _b2 = 0.0;
     }
+
+private:
+    float _thetac;
+    float _gamma;
 }
 
 /// Second order highpass filter
-class HighpassO2(T) : BiQuad
+class HighpassO2 : BiQuad
 {
 public:
-    void setQualityFactor(T Q)
+    void setQualityFactor(float Q) nothrow @nogc
     { 
         if(Q != _q)
         {
@@ -38,16 +40,10 @@ public:
             calcCoefficients();
         }
     }
-    
-private:
-    T _thetac;
-    T _q = cast(T) 0.707;
-    T _beta;
-    T _gamma;
-    
-    override void calcCoefficients()
+
+    override void calcCoefficients() nothrow @nogc
     {
-        thetac = 2 * PI * _frequency / _sampleRate;
+        _thetac = 2 * PI * _frequency / _sampleRate;
         _d0 = 1 / _q;
         _beta = 0.5 * (1 - (_d0 / 2) * sin(_thetac)) / (1 + (_d0 / 2) * sin(_thetac));
         _gamma = (0.5 + _beta) * cos(_thetac);
@@ -57,21 +53,55 @@ private:
         _b1 = -2.0 * _gamma;
         _b2 = 2.0 * _beta;
     }
+    
+private:
+    float _thetac;
+    float _q = 0.707f;
+    float _beta;
+    float _gamma;
 }
 
 /// Second order butterworth highpass filter
-class ButterworthHP(T) : BiQuad
+class ButterworthHP : BiQuad
 {
-private:
-    T _C;
-    
-    override void calcCoefficients()
+public:
+    this() nothrow @nogc
+    {
+        super();
+    }
+    override void calcCoefficients() nothrow @nogc
     {
         _C = tan(PI * _frequency / _sampleRate);
         _a0 = 1.0 / (1 + sqrt(2.0f) * _C + (_C * _C));
         _a1 = -2.0 * _a0;
         _a2 = _a0;
         _b1 = 2.0 * _a0 * (_C * _C - 1.0);
-        _b2 = _a0 * (1 - sqrt(2) * _C + _C * _C);
+        _b2 = _a0 * (1.0f - sqrt(2.0f) * _C + _C * _C);
     }
+
+private:
+    float _C;
+}
+
+/// Second order LinkwitzRiley highpass filter
+class LinkwitzRileyHP : BiQuad
+{
+public:
+    override void calcCoefficients() nothrow @nogc
+    {
+        _theta = PI * _frequency / _sampleRate;
+        _omega = PI * _frequency;
+        _kappa = _omega / tan(_theta);
+        _delta = _kappa * _kappa + _omega * _omega + 2 * _kappa * _omega;
+        _a0 = (_kappa * _kappa) / _delta;
+        _a1 = -2 * _a0;
+        _a2 = _a0;
+        _b1 = (-2 * _kappa * _kappa + 2 * _omega * _omega) / _delta;
+        _b2 = (-2 * _kappa * _omega + _kappa * _kappa + _omega * _omega) / _delta;
+    }
+private:
+    float _theta;
+    float _omega;
+    float _kappa;
+    float _delta;
 }

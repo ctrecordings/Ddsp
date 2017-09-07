@@ -168,9 +168,9 @@ unittest
 {
     import dplug.core.nogc;
     
-    DigitalDelay d = mallocEmplace!DigitalDelay();
-    d.initialize(44100, 2000, 1000, 0.0, 1.0);
-    testEffect(d, "DDelay", 44100 * 2, false);
+    //DigitalDelay d = mallocEmplace!DigitalDelay();
+    //d.initialize(44100, 2000, 1000, 0.0, 1.0);
+    //testEffect(d, "DDelay", 44100 * 2, false);
 }
 
 /** TODO: process each AEffect on the feedback input
