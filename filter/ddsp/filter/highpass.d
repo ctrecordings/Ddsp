@@ -72,10 +72,10 @@ public:
     override void calcCoefficients() nothrow @nogc
     {
         _C = tan(PI * _frequency / _sampleRate);
-        _a0 = 1.0 / (1 + sqrt(2.0f) * _C + (_C * _C));
-        _a1 = -2.0 * _a0;
+        _a0 = 1.0f / (1.0f + sqrt(2.0f) * _C + (_C * _C));
+        _a1 = -2.0f * _a0;
         _a2 = _a0;
-        _b1 = 2.0 * _a0 * (_C * _C - 1.0);
+        _b1 = 2.0f * _a0 * (_C * _C - 1.0f);
         _b2 = _a0 * (1.0f - sqrt(2.0f) * _C + _C * _C);
     }
 
