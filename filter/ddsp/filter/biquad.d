@@ -68,7 +68,7 @@ class BiQuad : AEffect
 
         override float getNextSample(float input)  nothrow @nogc
         {
-            float output = (_a0 * input + _a1 * _xn1 + _a1 * _xn2 - _b1 * _yn1 - _b2 * _yn2) * _c0 + (input * _d0);
+            float output = (_a0 * input + _a1 * _xn1 + _a2 * _xn2 - _b1 * _yn1 - _b2 * _yn2) * _c0 + (input * _d0);
 
             _xn2 = _xn1;
             _xn1 = input;
