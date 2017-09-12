@@ -17,6 +17,4 @@ d:
  
 script:
 
- dub test --compiler=${DC} ddsp:util
- dub test --compiler=${DC} ddsp:effect
- dub test --compiler=${DC} ddsp:filter
+ dub test --compiler=${DC}
