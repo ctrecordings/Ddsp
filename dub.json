@@ -26,8 +26,7 @@
             "sourcePaths": ["effect/ddsp/effect"],
             "importPaths": ["effect"],
             "dependencies": {
-                "dplug:core": "*",
-                "dplug:dsp": "*"
+                "dplug:core": "*"
             }
         },
         {
@@ -35,8 +34,7 @@
             "sourcePaths": ["filter/ddsp/filter"],
             "importPaths": ["filter"],
             "dependencies": {
-                "dplug:core": "*",
-                "dplug:dsp": "*"
+                "dplug:core": "*"
             }
         },
         {
@@ -44,8 +42,7 @@
             "sourcePaths": ["util/ddsp/util"],
             "importPaths": ["osc"],
             "dependencies": {
-                "dplug:core": "*",
-                "dplug:dsp": "*"
+                "dplug:core": "*"
             }
         },
         {
@@ -53,13 +50,11 @@
             "sourcePaths": ["osc/ddsp/osc"],
             "importPaths": ["osc"],
             "dependencies": {
-                "dplug:core": "*",
-                "dplug:dsp": "*"
+                "dplug:core": "*"
             }
         }
     ],
     "dependencies": {
-        "dplug:core": "~>5.0.1",
-        "dplug:dsp": "~>5.0.1"
+        "dplug:core": "~>5.0.1"
     }
 }
