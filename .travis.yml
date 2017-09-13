@@ -10,8 +10,6 @@ d:
  - dmd-beta
  - dmd-2.075.0
  - dmd-2.072.1
- - gdc-6.3.0
- - gdc-4.8.2
  
 script:
 
