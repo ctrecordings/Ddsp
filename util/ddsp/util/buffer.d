@@ -6,216 +6,93 @@
 module ddsp.util.buffer;
 
 import core.stdc.stdlib;
-import dplug.core.alignedbuffer;
-import dplug.core.nogc;
 
-/**
-An Index that points to a position in a buffer.
-*/
-class BufferIndex
+/// Just a simple generic circular buffer.  Should fulfill the needs of most
+/// simple delaying tasks.
+class Buffer(T)
 {
-    public:
-
-    this(size_t position, size_t bufferLength, int id)
+public:
+nothrow:
+@nogc:
+    
+    this(size_t size)
     {
-        _id = id;
-        _position = position;
-        _bufferLength = bufferLength;
-    }
-
-    @property size_t position() nothrow @nogc { return _position; }
-
-    size_t getPositionAndIncrement() nothrow @nogc
-    {
-        if(++_position == _bufferLength)
-            _position = 0;
-        return _position;
+        _maxSize = size;
+        mallocBuffer(_maxSize);
+        _currentSize = _maxSize;
+        _writeIndex = _currentSize - 1;
+        _readIndex = 0;
     }
     
-    /**
-    * same as above but shifts the index by amount specified
-    */
-    /*size_t getPositionShiftAndIncrement(size_t shiftAmount) nothrow @nogc
+    /// Gets the element from the buffer at the current read index, and
+    /// increments the read index.
+    T read()
     {
-        _position += shiftAmount + 1;
-        if(_position >= _bufferLength)
-            _position = 
-        //return 
-    }*/
-
-    void resetSize(size_t bufferLength) nothrow @nogc
-    {
-        _bufferLength = bufferLength;
-        if(_position >= bufferLength){
-            _position %= bufferLength;
-        }
-    }
-
-    private:
-
-    int _id;
-    size_t _position;
-    size_t _bufferLength;
-}
-
-/**
-TODO: Add separate Vecs for read and write indexes so that they can
-all be shifted equally on resize operations.
-*/
-class AudioBuffer
-{
-    public:
-
-    /**
-    * Allocates a memory heap for the buffer. And sets each element to 0.
-    */
-    void initialize(size_t size)
-    {
-        _indexList = makeVec!BufferIndex();
-        buffer = cast(float*) malloc(size * float.sizeof);
-        _sudoLength = size;
-        _size = size;
-        clear();
-    }
-
-    /**
-    Creates a new index at the startingPosition and assigns it an id to be
-    retrieved by.
-    
-    IMPORTANT:
-    0 should be the read index for resizing purposes.
-    */
-    void addIndex(ulong startingPosition, int id)
-    {
-        BufferIndex newIndex = mallocNew!BufferIndex(cast(uint) startingPosition, _sudoLength, id);
-        _indexList.pushBack(newIndex);
-    }
-
-    /**
-    Retrieves the Index with specified Id
-    */
-    BufferIndex getIndex(int id) nothrow @nogc
-    {
-        assert(id >= 0 && id < _indexList.length);
-        return _indexList[id];
-    }
-
-    /**
-    Read the buffer at the position of the given index id.
-    */
-    float read(int indexId) nothrow @nogc
-    {
-        return buffer[getIndex(indexId).getPositionAndIncrement()];
-    }
-
-    /**
-    Write to the buffer at the position of the given index id.
-    */
-    void write(int indexId, float value) nothrow @nogc
-    {
-        buffer[getIndex(indexId).getPositionAndIncrement()] = value;
-    }
-
-    /**
-    This is currently not ideal since the position of each index is basically
-    chopped off if it is greater than the new size.  The best case would be to
-    shift the indexes first.
-    */
-    void resize(size_t size) nothrow @nogc
-    {
-        size_t difference = size - _sudoLength;
-        _sudoLength += difference;
-        foreach(BufferIndex index; _indexList){
-            index.resetSize(_sudoLength);
-        }
+        T element = _buffer[_readIndex];
+        incrementIndex(_readIndex);
+        return element;
     }
     
-    void betterResize(size_t size) nothrow @nogc
+    /// Assign the buffer element at the current write index to element and
+    /// increment the write index.
+    void write(T element)
     {
-        if(size != _size)
+        _buffer[_writeIndex] = element;
+        incrementIndex(_writeIndex);
+    }
+    
+    /// Resize the buffer. If the new size is larger than the max size, the buffer
+    /// will be reallocated so that size is the new maximum size.  It is very
+    /// inefficient to delete and allocate large amounts of memory like this so
+    /// it is recommended to give the buffer an initial max size that will never
+    /// be exceeded.
+    void setSize(size_t size)
+    {
+        if(size > _maxSize)
         {
-            float *newBuffer = cast(float*) malloc(size * float.sizeof);
-            
-            //size_t smallerSize = size < _size ? size : _size;
-            for(int i = 0; i < size; ++i){
-                newBuffer[i] = read(0);
-            }
-            
-            free(buffer);
-            buffer = newBuffer;
-            
-            foreach(BufferIndex index; _indexList)
-            {
-                index.resetSize(size);
-            }
+            _maxSize = size;
+            mallocBuffer(_maxSize);
+            _currentSize = _maxSize;
         }
-    }
-    
-    ///Reset all elements to 0
-    void clear() nothrow @nogc
-    {
-        for(int i = 0; i < _size; ++i)
+        else
         {
-            buffer[i] = 0;
+            _currentSize = _maxSize;
         }
+        _writeIndex = _currentSize - 1;
+        _readIndex = 0;
     }
-
-    @property size_t size() nothrow @nogc {return _size;}
-
-    /**
-    Used for testing. Returns buffer as array.
-    */
-    float[] getElements()
+    
+private:
+    /// The size that the buffer is originally set to.
+    size_t _maxSize;
+    
+    /// The size that the buffer is currently set to.
+    size_t _currentSize;
+    
+    /// Array that holds the elements
+    T* _buffer;
+    
+    /// Points to the current sample to be read from
+    size_t _readIndex;
+    
+    /// Points to the current sample to be written to
+    size_t _writeIndex;
+    
+    /// Takes an index and increments it by 1, if it exceeds the size of the buffer
+    /// it will be wrapped around to 0.
+    void incrementIndex(ref size_t index)
     {
-        float[] data;
-        for(int i = 0; i < _size; ++i)
-            data ~= buffer[i];
-        return data;
+        if(++index >= _maxSize)
+            index = 0;
     }
-
-    private:
-
-    float* buffer;
-    size_t _size;
     
-    size_t _sudoLength;
-    
-    Vec!BufferIndex _indexList;
-}
-
-unittest
-{
-    import std.stdio;
-    import std.random;
-
-    bool runTest = false;
-
-    if(runTest)
+    void mallocBuffer(size_t bufferSize)
     {
-        Random gen;
-
-        enum indexes
-        {
-            writeIndex,
-            readIndex,
-        }
-
-        //AudioBuffer b = new AudioBuffer();
-        AudioBuffer b = mallocNew!AudioBuffer();
-        b.initialize(100);
-        b.clear();
-
-        b.addIndex(0, indexes.readIndex);
-        b.addIndex(99, indexes.writeIndex);
-
-        writeln("Buffer test...");
-        writefln("Elements: %s", b.getElements());
-        for(int i = 0; i < b.size * 2; ++i){
-            float sample = uniform(0.0L, 1.0L, gen);
-            b.write(indexes.writeIndex, sample);
-            if(i%10 == 0)
-                writef("%s ", b.read(indexes.readIndex));
-        }
-        writeln("\n...End Buffer test\n");
-        }
+        if(_buffer)
+            free(_buffer);
+            
+        _buffer = cast(T*) malloc(bufferSize * T.sizeof);
+        foreach(element; 0..bufferSize)
+            _buffer[element] = cast(T) 0;
+    }
 }
