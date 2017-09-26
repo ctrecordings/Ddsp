@@ -3,7 +3,7 @@
 * License: MIT License
 * Author(s): Ethan Reker
 */
-module ddsp.filter.shelf;
+module ddsp.filter.peak;
 
 import ddsp.filter.biquad;
 import ddsp.effect.aeffect;
@@ -11,7 +11,7 @@ import ddsp.effect.aeffect;
 import std.math;
 
 /// The equations for calculating the BiQuad Coefficients are based off of those from vinniefalco/DSPFilters
-class LowShelf : AEffect
+class BandShelf : AEffect
 {
 public:
 
@@ -81,21 +81,22 @@ private:
     float _frequency;
     float _gain;
 
+    const double doubleLn2  =0.69314718055994530941723212145818;
+
     void calcCoefficients() nothrow @nogc
     {
-        float shelfSlope = 2.0f;
+        float bandWidth = 0.707f;
         float A  = pow (10, _gain/40);
         float w0 = 2 * pi * _frequency / _sampleRate;
-        float cs = cos (w0);
-        float sn = sin (w0);
-        float AL = sn / 2 * sqrt ((A + 1/A) * (1 / shelfSlope - 1) + 2);
-        float sq = 2 * sqrt(A) * AL;
-        _b0 =    A*( (A+1) - (A-1)*cs + sq );
-        _b1 =  2*A*( (A-1) - (A+1)*cs );
-        _b2 =    A*( (A+1) - (A-1)*cs - sq );
-        _a0 =        (A+1) + (A-1)*cs + sq;
-        _a1 =   -2*( (A-1) + (A+1)*cs );
-        _a2 =        (A+1) + (A-1)*cs - sq;
+        float cs = cos(w0);
+        float sn = sin(w0);
+        float AL = sn * sinh( doubleLn2/2 * bandWidth * w0/sn );
+        _b0 =  1 + AL * A;
+        _b1 = -2 * cs;
+        _b2 =  1 - AL * A;
+        _a0 =  1 + AL / A;
+        _a1 = -2 * cs;
+        _a2 =  1 - AL / A;
 
         _b0 /= _a0;
         _b1 /= _a0;
@@ -111,10 +112,10 @@ unittest
     import dplug.core.alignedbuffer;
     import ddsp.effect.aeffect;
 
-    Vec!LowShelf filters = makeVec!LowShelf;
+    Vec!BandShelf filters = makeVec!BandShelf;
     foreach(channel; 0..2)
     {
-        filters.pushBack(mallocNew!LowShelf);
+        filters.pushBack(mallocNew!BandShelf);
         filters[channel].setSampleRate(44100.0f);
         filters[channel].setFrequency(150.0f);
         filters[channel].setGain(3.0f);
@@ -122,5 +123,5 @@ unittest
 
     //testEffect(AEffect effect, string name, size_t bufferSize = 20000, bool outputResults = false)
     foreach(filter; filters)
-        testEffect(filter, "LowShelf" , 20000, false);
+        testEffect(filter, "BandShelf" , 20000, true);
 }
