@@ -77,6 +77,7 @@ public:
     {
         _lookAheadAmount = msToSamples(maxLookAhead, _sampleRate);
         _buffer = mallocNew!(Buffer!float)(cast(size_t)_lookAheadAmount);
+        _ratio = float.infinity;
         _limit = true;
     }
     
