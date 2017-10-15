@@ -8,10 +8,11 @@ module ddsp.util.functions;
 import std.math;
 import core.stdc.stdlib;
 import std.conv : emplace;
+import std.algorithm : clamp;
 
 float floatToDecibel(float value) nothrow @nogc
 {
-  return 20 * log(value);  
+  return clamp(20 * log(value), -96, 12);  
 }
 
 float dedibelToFloat(float value) nothrow @nogc
@@ -54,16 +55,19 @@ unittest
 {
   import std.stdio;
 
-  bool runTest = false;
+  bool runTest = true;
 
   if(runTest)
   {
-    float[] x = [1,3,5,12];
-    float[] y = [6,3,2,8];
+    float[] x = [1, 0.7079457844, 0.5011872336, 0.2511886432, 0.0630957344, 0.0039810717, 0.0000158489];
+    float[] y = [1, 0.833333333, 0.666666666, 0.5, 0.333333333, 0.166666666, 0];
 
     writefln("Functions test..");
     writefln("x: %s", x);
     writefln("y: %s", y);
-    writefln("Lagrange x = 11.999: %s", lagrpol(x, y, 4, 11.999));
+    for(int i = 0; i < 101; ++i)
+    {
+      writefln("Lagrange x = %s: %s",cast(float)i / 100, lagrpol(x, y, 2, cast(float)i/100));
+    }
   }
 }
