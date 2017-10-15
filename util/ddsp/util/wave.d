@@ -101,7 +101,7 @@ unittest
 {
     import std.stdio;
 
-    WaveFile file = new WaveFile("util/ddsp/util/8bitexample.wav");
-    writeln(file.toString());
-    writeln(file.getSampleData()[0..1000]);
+    //WaveFile file = new WaveFile("util/ddsp/util/8bitexample.wav");
+    //writeln(file.toString());
+    //writeln(file.getSampleData()[0..1000]);
 }
