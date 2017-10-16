@@ -123,5 +123,5 @@ unittest
 
     //testEffect(AEffect effect, string name, size_t bufferSize = 20000, bool outputResults = false)
     foreach(filter; filters)
-        testEffect(filter, "BandShelf" , 20000, true);
+        testEffect(filter, "BandShelf" , 20000, false);
 }

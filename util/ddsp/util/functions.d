@@ -93,7 +93,7 @@ unittest
 {
   import std.stdio;
 
-  bool runTest = true;
+  bool runTest = false;
 
   if(runTest)
   {
