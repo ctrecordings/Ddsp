@@ -1,119 +1,144 @@
 module ddsp.util.envelope;
 
 import std.math;
-
-/// Enum to represent different detection modes
-enum DetectorType : int
-{
-    PEAK = 0,
-    MS = 1,
-    RMS = 2
-}
-
-/// 
+import std.algorithm;
+/+
+http://www.musicdsp.org/showArchiveComment.php?ArchiveID=97
++/
 class EnvelopeDetector
 {
 public:
 nothrow:
 @nogc:
+
     this()
     {
-        _env = 0.0f;
-        digital = true;
-        _preGain = 0.0f;
+        _envelope = 0f;    
     }
     
-    /// Must be called to set the sample rate before setEnvelope()
     void setSampleRate(float sampleRate)
     {
         _sampleRate = sampleRate;
     }
     
-    /// must be called atleast once before calling detect()
-    /// used to set all important parameters at the same time
-    void setEnvelope(float attackTime, float releaseTime, DetectorType type = DetectorType.RMS)
+    void setEnvelope(float attackTime, float releaseTime)
     {
-        setDetectMode(type);
-        setAttackTime(attackTime);
-        setReleaseTime(releaseTime);
+        _ga = exp(-1/(_sampleRate * attackTime / 1000));
+        _gr = exp(-1 / (_sampleRate * releaseTime / 1000));
     }
     
-    /// _env is recalculated from the input value.  Should be called inside
-    /// `processReplacing` or similar function call from the host
     void detect(float input)
     {
-        if(_type == DetectorType.PEAK)
-            input = abs(input);
-        if(_type == DetectorType.MS)
-            input = abs(input) * abs(input);
-        if(_type == DetectorType.RMS)
-            input = sqrt(abs(input) * abs(input));
-            
-        if(input > _env)
-            _env = _attackTime * (_env - input) + input;
+        float envIn = abs(input);
+        
+        if(_envelope < envIn)
+            _envelope = _envelope * _ga + (1 - _ga) * envIn;
         else
-            _env = _releaseTime * (_env - input) + input;
+            _envelope = _envelope * _gr + (1 - _gr) * envIn;
+        
     }
     
-    /// get current envelope value
-    float getEnvelope() { return _env; }
-    
-    /// sets the attack coefficient based to the attack time given
-    /// `attackTime` is in milliseconds
-    void setAttackTime(float attackTime)
+    float getEnvelope()
     {
-        _tc = digital ? log(0.01) : log(0.368);
-        _attackTime = exp(_tc / (attackTime * _sampleRate * 0.001));
+        return _envelope;
     }
     
-    /// sets the release coefficient based to the attack time given
-    /// `releaseTime` is in milliseconds
-    void setReleaseTime(float releaseTime)
-    {
-        _tc = digital ? log(0.01) : log(0.368);
-        _releaseTime = exp(_tc / (releaseTime * _sampleRate * 0.001));
-    }
-
-    /// Change the time mode to analog.  This leads to the timeConstant being 
-    /// log(0.368)
-    void setModeAnalog() { digital = false; }
+private:
+    /// Attack coefficient
+    float _ga;
     
-    /// Change the time mode to digital. Note that the time mode is already
-    /// Digital by default.  This makes the timeConstant = log(0.01)
-    void setModeDigital() { digital = true; }
+    /// Release coefficient
+    float _gr;
     
-    /// Change the dector type.  Possible values {PEAK, MS, RMS}
-    void setDetectMode(DetectorType type) { _type = type; }
+    /// stores the current value of the envelope;
+    float _envelope;
     
-protected:
-
-    /// 0 to +20dB gain to drive the detector
-    float _preGain;
-    
-    /// the value that the input signal must cross to trigger the detector
-    float _threshold;
-
-    /// Attack time in ms
-    float _attackTime;
-    
-    /// Release time in ms
-    float _releaseTime;
-    
-    /// 
+    /// Sample Rate
     float _sampleRate;
-    
-    /// determines the time constant for detection
-    bool digital;
-    
-    /// time constant calculated
-    float _tc;
-    
-    /// value that the holds the current envelope
-    float _env;
-    
-    /// enum to represent different detection modes
-    DetectorType _type;
-    
-    /// second-order lowpass filter to smooth the envelope
-    //LowpassFilterO2 lowpass;
 }
+
+/// Simple Peak envelope follower, useful for meters.
+/+
+http://www.musicdsp.org/archive.php?classid=2#19
++/
+class PeakFollower
+{
+public:
+nothrow:
+@nogc:
+
+    this()
+    {
+        _envelope = 0f;
+    }
+    
+    void setSampleRate(float sampleRate)
+    {
+        _sampleRate = sampleRate;
+    }
+    
+    void initialize(float decayTime)
+    {
+        _decay = pow(0.5, 1.0 / (decayTime * _sampleRate));
+    }
+    
+    void detect(float input)
+    {
+        input = abs(input);
+        
+        if(input >= _envelope)
+            _envelope = input;
+        else
+        {
+            _envelope = clamp(_envelope * _decay, 0.0f, 1.0f);
+        }
+    }
+    
+    float getEnvelope()
+    {
+        return _envelope;
+    }
+    
+private:
+    float _envelope;
+    
+    float _decay;
+    
+    float _sampleRate;
+}
+
+/+class SimpleRMS
+{
+public:
+nothrow:
+@nogc:
+
+    this()
+    {
+        _envelope = 0.0f;
+    }
+    
+    void setSampleRate(float sampleRate)
+    {
+        _sampleRate = sampleRate;
+    }
+    
+    void initialize(uint windowSize)
+    {
+        _windowSize = windowSize;
+        buffer = cast(T*) malloc(windowSize * T.sizeof);
+    }
+    
+    void detect(float input)
+    {
+        
+    }
+    
+    float getEnvelope()
+    {
+        return _envelope;
+    }
+    
+private:
+    float[] buffer;
+}+/
