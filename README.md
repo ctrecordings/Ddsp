@@ -1,4 +1,4 @@
-# Ddsp [![Build Status](https://travis-ci.org/abaga129/Ddsp.svg?branch=master)](https://travis-ci.org/abaga129/Ddsp) [![Dub version](https://img.shields.io/dub/v/ddsp.svg)](https://code.dlang.org/packages/ddsp) 
+# Ddsp [![Build Status](https://travis-ci.org/ctrecordings/Ddsp.svg?branch=master)](https://travis-ci.org/ctrecordings/Ddsp) [![Dub version](https://img.shields.io/dub/v/ddsp.svg)](https://code.dlang.org/packages/ddsp) 
 A high level library for Digital Signal Processing in D with a focus on audio.
 
 Many of these effects are based on designs from [Designing Audio Effect Plug-Ins in C++](http://www.willpirkle.com/about/books/)
