@@ -20,7 +20,7 @@ public:
 nothrow:
 @nogc:
     
-    override float getNextSample(float input)
+    override float getNextSample(const ref float input)
     {
         _detector.detect(input);
         float detectorValue = floatToDecibel(_detector.getEnvelope());
@@ -81,7 +81,7 @@ public:
         _limit = true;
     }
     
-    override float getNextSample(float input)
+    override float getNextSample(const ref float input)
     {
         _buffer.write(input);
         float lookAheadOutput = _buffer.read();

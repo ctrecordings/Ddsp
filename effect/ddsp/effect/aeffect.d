@@ -18,7 +18,7 @@ public:
     /**
     * Process a sample that is passed to the processor, and return the next sample.
     */
-    abstract float getNextSample(float input) nothrow @nogc;
+    abstract float getNextSample(const ref float input) nothrow @nogc;
     
     
     
@@ -54,7 +54,7 @@ public:
         _fxChain.pushBack(effect);
     }
 
-    override float getNextSample(float input) nothrow @nogc
+    override float getNextSample(const ref float input) nothrow @nogc
     {
         float output = input;
         foreach(AEffect e; _fxChain)

@@ -15,7 +15,7 @@ public:
 nothrow:
 @nogc:
     
-    this(size_t size)
+    this(const size_t size)
     {
         _maxSize = size;
         mallocBuffer(_maxSize);
@@ -35,7 +35,7 @@ nothrow:
     
     /// Assign the buffer element at the current write index to element and
     /// increment the write index.
-    void write(T element)
+    void write(const T element)
     {
         _buffer[_writeIndex] = element;
         incrementIndex(_writeIndex);
@@ -46,7 +46,7 @@ nothrow:
     /// inefficient to delete and allocate large amounts of memory like this so
     /// it is recommended to give the buffer an initial max size that will never
     /// be exceeded.
-    void setSize(size_t size)
+    void setSize(const size_t size)
     {
         if(size > _maxSize)
         {
@@ -86,7 +86,7 @@ private:
             index = 0;
     }
     
-    void mallocBuffer(size_t bufferSize)
+    void mallocBuffer(const size_t bufferSize)
     {
         if(_buffer)
             free(_buffer);

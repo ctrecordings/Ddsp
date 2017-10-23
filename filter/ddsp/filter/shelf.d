@@ -24,7 +24,7 @@ public:
         }
     }
 
-    override float getNextSample(float input)  nothrow @nogc
+    override float getNextSample(const ref float input)  nothrow @nogc
     {
         _w = input - _a1 * _w1 - _a2 * _w2;
         _yn = _b0 * _w + _b1 *_w1 + _b2 * _w2;

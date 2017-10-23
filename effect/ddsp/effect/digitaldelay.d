@@ -66,7 +66,7 @@ public:
         setMixAmount(mix);
     }
     
-    override float getNextSample(float input) nothrow @nogc
+    override float getNextSample(const ref float input) nothrow @nogc
     {
         float xn = input;
         float yn = buffer[_readIndex];

@@ -43,7 +43,7 @@ public:
         initialize(frequency, _sampleRate);
     }
     
-    override float getNextSample(float input) nothrow @nogc
+    override float getNextSample(const ref float input) nothrow @nogc
     {
         yq = yq1-epsilon * yn1;
         yn = epsilon * yq + yn1;

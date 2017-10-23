@@ -218,7 +218,7 @@ public:
     *   Note: only returns single phase output. To get quadrature phase output
     *   use `void doOscillate(&float, &float)`
     */
-    override float getNextSample(float input) nothrow @nogc
+    override float getNextSample(const ref float input) nothrow @nogc
     {
         currentSample = 0;
         currentQuadPhaseSample = 0;

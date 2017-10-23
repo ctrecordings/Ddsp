@@ -1,7 +1,15 @@
+/**
+* Copyright 2017 Cut Through Recordings
+* License: MIT License
+* Author(s): Ethan Reker
+*/
 module ddsp.util.envelope;
 
 import std.math;
 import std.algorithm;
+
+/// Envelop Detector with adjustable attack and release times. Great for compressors
+/// and meters.
 /+
 http://www.musicdsp.org/showArchiveComment.php?ArchiveID=97
 +/
@@ -16,12 +24,12 @@ nothrow:
         _envelope = 0f;    
     }
     
-    void setSampleRate(float sampleRate)
+    void setSampleRate(const float sampleRate)
     {
         _sampleRate = sampleRate;
     }
     
-    void setEnvelope(float attackTime, float releaseTime)
+    void setEnvelope(const float attackTime, const float releaseTime)
     {
         _ga = exp(-1/(_sampleRate * attackTime / 1000));
         _gr = exp(-1 / (_sampleRate * releaseTime / 1000));
@@ -72,22 +80,22 @@ nothrow:
         _envelope = 0f;
     }
     
-    void setSampleRate(float sampleRate)
+    void setSampleRate(const float sampleRate)
     {
         _sampleRate = sampleRate;
     }
     
-    void initialize(float decayTime)
+    void initialize(const float decayTime)
     {
         _decay = pow(0.5, 1.0 / (decayTime * _sampleRate));
     }
     
-    void detect(float input)
+    void detect(const float input)
     {
-        input = abs(input);
+        float absInput = abs(input);
         
-        if(input >= _envelope)
-            _envelope = input;
+        if(absInput >= _envelope)
+            _envelope = absInput;
         else
         {
             _envelope = clamp(_envelope * _decay, 0.0f, 1.0f);
