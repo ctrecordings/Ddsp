@@ -32,7 +32,10 @@ import ddsp.effect.aeffect;
 const float pi = 3.14159265;
 
 
-/// Allpass filter
+/// Allpass filter for introducting a 180 degrees phase shift at the center
+/// frequency.  This is necessary for summing more than 2 bands created from
+/// Linkwitz-Riley filters.
+/// TODO: Inherit BiQuad directly to remove redundent code.
 class Allpass : AEffect
 {
 public:
