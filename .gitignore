@@ -9,4 +9,6 @@ dub.selections.json
 *.suo
 *.so 
 *.sh
+*.wav
+*.wave
 ddsp-test-library

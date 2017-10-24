@@ -1,0 +1,13 @@
+{
+	"name": "lowpass-wavefile",
+	"authors": [
+		"Ethan Reker"
+	],
+	"dependencies": {
+		"ddsp": "~>1.0.1",
+		"wave-d": "~>1.0.6"
+	},
+	"description": "D",
+	"copyright": "Copyright © 2017, reker",
+	"license": "MIT"
+}
