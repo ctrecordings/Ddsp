@@ -22,7 +22,7 @@ nothrow:
     
     override float getNextSample(const ref float input)
     {
-        _detector.detect(input);
+        _detector.detect(input * 6);
         float detectorValue = floatToDecibel(_detector.getEnvelope());
         
         return input * calcCompressorGain(detectorValue, _threshold, _ratio, _kneeWidth);
