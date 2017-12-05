@@ -22,16 +22,19 @@ public:
 nothrow:
 @nogc:
 
+    /// Tracks the input level to trigger compression.
+    EnvelopeDetector detector;
+
     this()
     {
         x = mallocSlice!float(2);
         y = mallocSlice!float(2);
-        _detector = mallocNew!EnvelopeDetector;
+        detector = mallocNew!EnvelopeDetector;
     }
     
     void setParams(float attackTime, float releaseTime, float threshold, float ratio, float knee)
     {
-        _detector.setEnvelope(attackTime, releaseTime);
+        detector.setEnvelope(attackTime, releaseTime);
         _threshold = threshold;
         _ratio = ratio;
         _kneeWidth = knee;
@@ -50,7 +53,7 @@ nothrow:
     override void setSampleRate(float sampleRate)
     {
         _sampleRate = sampleRate;
-        _detector.setSampleRate(_sampleRate);
+        detector.setSampleRate(_sampleRate);
     }
     
     /// Allows this processors envelope to be linked to another processor.
@@ -88,11 +91,25 @@ protected:
     /// decibels
     float _kneeWidth;
     
-    /// Tracks the input level to trigger compression.
-    EnvelopeDetector _detector;
-    
     /// Holds the points used for interpolation;
     float[]  x, y;
 
     //DynamicsProcessor _linkedProcessor;
+}
+
+class StereoDynamicsProcessor : DynamicsProcessor
+{
+public:
+    EnvelopeDetector *linkedDetector;
+
+	this() nothrow @nogc
+	{
+		super();
+	}
+
+    void linkStereo(StereoDynamicsProcessor stereoProcessor) nothrow @nogc
+    {
+        linkedDetector = &stereoProcessor.detector;
+        stereoProcessor.linkedDetector = &this.detector;
+    }
 }

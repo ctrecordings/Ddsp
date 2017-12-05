@@ -22,8 +22,8 @@ nothrow:
     
     override float getNextSample(const ref float input)
     {
-        _detector.detect(input);
-        float detectorValue = floatToDecibel(_detector.getEnvelope());
+        detector.detect(input);
+        float detectorValue = floatToDecibel(detector.getEnvelope());
         
         return input * calcExpanderGain(detectorValue, _threshold, _ratio, _kneeWidth);
     }

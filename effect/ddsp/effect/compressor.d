@@ -22,8 +22,61 @@ nothrow:
     
     override float getNextSample(const ref float input)
     {
-        _detector.detect(input * 6);
-        float detectorValue = floatToDecibel(_detector.getEnvelope());
+        detector.detect(input * 6);
+        float detectorValue = floatToDecibel(detector.getEnvelope());
+        
+        return input * calcCompressorGain(detectorValue, _threshold, _ratio, _kneeWidth);
+    }
+    
+private:
+
+    /// If set to true, ratio will become infinite and result in limiting
+    bool _limit;
+    
+    /// This is the function that does most of the work with calculating compression
+    float calcCompressorGain(float detectorValue, float threshold, float ratio, float kneeWidth)
+    {
+        float CS = 1.0f - 1.0f / ratio;
+        
+        if(_limit)
+            CS = 1.0f;
+            
+        if(kneeWidth > 0 && detectorValue > (threshold - kneeWidth / 2.0f) && 
+           detectorValue < threshold + kneeWidth / 2.0f)
+        {
+            x[0] = threshold - kneeWidth / 2.0f;
+            x[1] = threshold + kneeWidth / 2.0f;
+            x[1] = clamp(x[1], -96.0f, 0.0f);
+            y[0] = 0;
+            y[1] = CS;
+            
+            CS = lagrpol(x, y, 2, detectorValue);
+        }
+        
+        float yG = CS * (threshold - detectorValue);
+        
+        yG = clamp(yG, -96.0, 0);
+        
+        return pow(10.0f, yG / 20.0f);
+    }
+}
+
+class StereoCompressor : StereoDynamicsProcessor
+{
+public:
+nothrow:
+@nogc:
+    this()
+    {
+        super();
+    }
+    
+    override float getNextSample(const ref float input)
+    {
+        detector.detect(input * 6);
+        float thisDetector = detector.getEnvelope();
+        float otherDetector = linkedDetector.getEnvelope();
+        float detectorValue = (thisDetector + otherDetector) * 0.5;
         
         return input * calcCompressorGain(detectorValue, _threshold, _ratio, _kneeWidth);
     }
@@ -85,8 +138,8 @@ public:
     {
         _buffer.write(input);
         float lookAheadOutput = _buffer.read();
-        _detector.detect(input);
-        float detectorValue = floatToDecibel(_detector.getEnvelope());
+        detector.detect(input);
+        float detectorValue = floatToDecibel(detector.getEnvelope());
         return lookAheadOutput * calcCompressorGain(detectorValue, _threshold, _ratio, _kneeWidth);
     }
     
