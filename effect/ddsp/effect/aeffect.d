@@ -40,6 +40,8 @@ protected:
     float _sampleRate;
 }
 
+/// Holds a list of AudioEffects.  getNextSample(input)
+/// call getNextSample(input) on each effect in the chain
 class FXChain : AEffect
 {
 public:
@@ -49,11 +51,14 @@ public:
         _fxChain = makeVec!AEffect();
     }
     
+    /// Adds an effect to the end of the FX Chain
     void addEffect(AEffect effect)
     {
         _fxChain.pushBack(effect);
     }
 
+    /// Override from AEffect.  Processes the input through each effect
+    /// and passes the result to the next effect.
     override float getNextSample(const float input) nothrow @nogc
     {
         float output = input;
@@ -64,6 +69,8 @@ public:
         return output;
     }
 
+    /// Resets each effect in the chain. To clear buffers
+    /// and recalculate coefficients.
     override void reset() nothrow @nogc
     {
         foreach(AEffect e; _fxChain){
@@ -72,11 +79,17 @@ public:
     }
 
 private:
+
+    /// Vector of audio effects.
     Vec!AEffect _fxChain;
 }
 
 /**
 * This function should only be called in a unittest block.
+* AEffect effect : Effect to be tested.
+* string name : name that will be written to output.
+* size_t bufferSize : number of samples to be processed.
+* bool outputResults : determines if output should be printed.
 */
 void testEffect(AEffect effect, string name, size_t bufferSize = 20000, bool outputResults = false)
 {
