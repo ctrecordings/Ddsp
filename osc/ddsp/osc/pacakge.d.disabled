@@ -1,7 +1,0 @@
-module ddsp.osc;
-
-public
-{
-    import ddsp.osc.cfoscillator;
-    import ddsp.osc.wtoscillator;
-}

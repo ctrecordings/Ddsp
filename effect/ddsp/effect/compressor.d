@@ -21,7 +21,7 @@ public:
 nothrow:
 @nogc:
     
-    override float getNextSample(const ref float input)
+    override float getNextSample(const float input)
     {
         detector.detect(input * 6);
 
@@ -91,7 +91,7 @@ public:
         _limit = true;
     }
     
-    override float getNextSample(const ref float input)
+    override float getNextSample(const float input)
     {
         _buffer.write(input);
         float lookAheadOutput = _buffer.read();

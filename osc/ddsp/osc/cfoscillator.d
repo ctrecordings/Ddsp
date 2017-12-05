@@ -3,7 +3,7 @@
 * License: MIT License
 * Author(s): Ethan Reker
 */
-module cfoscillator.d;
+module ddsp.osc.cfoscillator;
 
 import ddsp.effect.aeffect;
 
@@ -43,7 +43,7 @@ public:
         initialize(frequency, _sampleRate);
     }
     
-    override float getNextSample(const ref float input) nothrow @nogc
+    override float getNextSample(const float input) nothrow @nogc
     {
         yq = yq1-epsilon * yn1;
         yn = epsilon * yq + yn1;
