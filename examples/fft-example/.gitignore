@@ -1,0 +1,14 @@
+.dub
+docs.json
+__dummy.html
+docs/
+fft-example.so
+fft-example.dylib
+fft-example.dll
+fft-example.a
+fft-example.lib
+fft-example-test-*
+*.exe
+*.o
+*.obj
+*.lst
