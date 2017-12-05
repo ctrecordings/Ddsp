@@ -24,6 +24,9 @@ nothrow:
 
     /// Tracks the input level to trigger compression.
     EnvelopeDetector detector;
+    
+    /// Will point to the detector of a processor that is stereo linked
+    EnvelopeDetector *linkedDetector;
 
     this()
     {
@@ -59,12 +62,11 @@ nothrow:
     /// Allows this processors envelope to be linked to another processor.
     /// This way the two will act as a single unit.  Both processors must call
     /// this on each other to function properly
-    /*void linkStereo(DynamicsProcessor linkedProcessor)
+    void linkStereo(DynamicsProcessor stereoProcessor) nothrow @nogc
     {
-        
-        _linkedProcessor = linkedProcessor;
+        linkedDetector = &stereoProcessor.detector;
+        stereoProcessor.linkedDetector = &this.detector;
     }
-    */
     
 protected:
     /// Amount of input gain in decibels
@@ -95,21 +97,4 @@ protected:
     float[]  x, y;
 
     //DynamicsProcessor _linkedProcessor;
-}
-
-class StereoDynamicsProcessor : DynamicsProcessor
-{
-public:
-    EnvelopeDetector *linkedDetector;
-
-	this() nothrow @nogc
-	{
-		super();
-	}
-
-    void linkStereo(StereoDynamicsProcessor stereoProcessor) nothrow @nogc
-    {
-        linkedDetector = &stereoProcessor.detector;
-        stereoProcessor.linkedDetector = &this.detector;
-    }
 }

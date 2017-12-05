@@ -1,0 +1,12 @@
+{
+	"name": "fft-example",
+	"authors": [
+		"Ethan Reker"
+	],
+	"dependencies": {
+		"dplug:dsp": "~>5.0.8"
+	},
+	"description": "Generate fft data from input wav file",
+	"copyright": "Copyright © 2017, Ethan Reker",
+	"license": "MIT"
+}
