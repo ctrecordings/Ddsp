@@ -43,7 +43,7 @@ nothrow:
         _kneeWidth = knee;
     }
     
-    override float getNextSample(const ref float input)
+    override float getNextSample(const float input)
     {
         return 0;
     }

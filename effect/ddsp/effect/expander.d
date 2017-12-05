@@ -20,7 +20,7 @@ public:
 nothrow:
 @nogc:
     
-    override float getNextSample(const ref float input)
+    override float getNextSample(const float input)
     {
         detector.detect(input);
         float detectorValue = floatToDecibel(detector.getEnvelope());
