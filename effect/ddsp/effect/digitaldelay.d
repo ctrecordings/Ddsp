@@ -36,7 +36,8 @@ public:
     
     ~this() nothrow @nogc { free(buffer); }
     
-    void initialize(float sampleRate) nothrow @nogc
+    /// Set the sample rate and initialize the buffer.
+    override void setSampleRate(float sampleRate) nothrow @nogc
     {
         _sampleRate = sampleRate;
         _feedback = 0;
@@ -50,6 +51,7 @@ public:
         reset();
     }
     
+    /// calculates and sets the number of samples required.
     void setDelay(float msDelay) nothrow @nogc
     {
         _delayInSamples = msToSamples(msDelay, _sampleRate);
@@ -59,7 +61,8 @@ public:
         _prevDelay = _delayInSamples;
     }
 
-    void update(float msDelay, float feedback, float mix) nothrow @nogc
+    /// Sets delay time, feedback, and mix
+    void setParams(float msDelay, float feedback, float mix) nothrow @nogc
     {
         setDelay(msDelay);
         setFeedbackAmount(feedback);
@@ -106,7 +109,7 @@ public:
         return output;
     }
     
-    //set all elements in the buffer to 0, and set reset indices.
+    //set all elements in the buffer to 0, and reset indices.
     override void reset() nothrow @nogc
     {
 		memset(buffer, 0, _size * float.sizeof);
@@ -133,6 +136,7 @@ public:
     
     void setMixAmount(float mix) nothrow @nogc { _mix = mix; }
 
+    /// used for debuging purposes.
     override string toString()
     {
         import std.conv;
@@ -168,21 +172,8 @@ unittest
 {
     import dplug.core.nogc;
     
-    //DigitalDelay d = mallocEmplace!DigitalDelay();
-    //d.initialize(44100, 2000, 1000, 0.0, 1.0);
+    DigitalDelay d = mallocNew!DigitalDelay();
+    //d.initialize(44100);
+    //d.update(22050, 0.5, 0.5);
     //testEffect(d, "DDelay", 44100 * 2, false);
 }
-
-/** TODO: process each AEffect on the feedback input
-float fb;
-if(!_useExternalFeedback)
-    fb = _feedback * yn;
-else
-    fb = _feedbackIn;
-
-for(int i = 0; i < feedbackFX.length(); ++i){
-    fb = feedbackFX[i].getNextSample(fb);
-}
-
-buffer[_writeIndex] = xn + fb;
-*/
