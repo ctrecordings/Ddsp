@@ -23,14 +23,14 @@ nothrow:
     
     override float getNextSample(const float input)
     {
-        detector.detect(input * 6);
+        detector.detect(input * 4);
 
         float detectorValue;
         if(linkedDetector !is null)
         {
             float thisDetector = detector.getEnvelope();
             float otherDetector = linkedDetector.getEnvelope();
-            detectorValue = (thisDetector + otherDetector) * 0.5;
+            detectorValue = floatToDecibel((thisDetector + otherDetector) * 0.5);
         }
         else
             detectorValue = floatToDecibel(detector.getEnvelope());

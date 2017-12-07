@@ -109,3 +109,9 @@ unittest
     }
   }
 }
+
+/// Simple nothrow @nogc method of rounding a float to an int
+int roundToInt(float x) nothrow @nogc
+{
+  return x - cast(int)x >= 0.5f ? (cast(int) x) + 1 : cast(int) x; 
+}
