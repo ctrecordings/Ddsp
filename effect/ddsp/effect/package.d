@@ -5,7 +5,7 @@
 */
 module ddsp.effect;
 
-public import ddsp.effect.aeffect;
+public import ddsp.effect.effect;
 public import ddsp.effect.compressor;
 public import ddsp.effect.dynamics;
 public import ddsp.effect.expander;

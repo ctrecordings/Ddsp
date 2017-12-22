@@ -3,15 +3,15 @@
 * License: MIT License
 * Author(s): Ethan Reker
 */
-module ddsp.effect.aeffect;
+module ddsp.effect.effect;
 
-import dplug.core.alignedbuffer;
+import dplug.core.vec;
 import dplug.core.nogc;
 
 /**
 * Should be inherited by all Audio Effect classes to allow for batch processing
 */
-abstract class AEffect
+abstract class AudioEffect
 {
 public:
     
@@ -42,27 +42,27 @@ protected:
 
 /// Holds a list of AudioEffects.  getNextSample(input)
 /// call getNextSample(input) on each effect in the chain
-class FXChain : AEffect
+class FXChain : AudioEffect
 {
 public:
 
     this()
     {
-        _fxChain = makeVec!AEffect();
+        _fxChain = makeVec!AudioEffect();
     }
     
     /// Adds an effect to the end of the FX Chain
-    void addEffect(AEffect effect)
+    void addEffect(AudioEffect effect)
     {
         _fxChain.pushBack(effect);
     }
 
-    /// Override from AEffect.  Processes the input through each effect
+    /// Override from AudioEffect.  Processes the input through each effect
     /// and passes the result to the next effect.
     override float getNextSample(const float input) nothrow @nogc
     {
         float output = input;
-        foreach(AEffect e; _fxChain)
+        foreach(AudioEffect e; _fxChain)
         {
             output = e.getNextSample(output);
         }
@@ -73,7 +73,7 @@ public:
     /// and recalculate coefficients.
     override void reset() nothrow @nogc
     {
-        foreach(AEffect e; _fxChain){
+        foreach(AudioEffect e; _fxChain){
             e.reset();
         }
     }
@@ -81,17 +81,17 @@ public:
 private:
 
     /// Vector of audio effects.
-    Vec!AEffect _fxChain;
+    Vec!AudioEffect _fxChain;
 }
 
 /**
 * This function should only be called in a unittest block.
-* AEffect effect : Effect to be tested.
+* AudioEffect effect : Effect to be tested.
 * string name : name that will be written to output.
 * size_t bufferSize : number of samples to be processed.
 * bool outputResults : determines if output should be printed.
 */
-void testEffect(AEffect effect, string name, size_t bufferSize = 20000, bool outputResults = false)
+void testEffect(AudioEffect effect, string name, size_t bufferSize = 20000, bool outputResults = false)
 {
     import std.stdio;
     import std.random;
@@ -125,6 +125,17 @@ void testEffect(AEffect effect, string name, size_t bufferSize = 20000, bool out
         writefln("End %s test..", name);
     }
 
+}
+
+template effectCreator(alias effectName)
+{
+    Vec!effectName numChannels(int n) nothrow @nogc
+    {
+        Vec!effectName e = makeVec!effectName();
+        foreach(chan; 0..n)
+            e.pushBack(mallocNew!effectName());
+        return e;
+    }
 }
 
 unittest

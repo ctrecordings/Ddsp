@@ -5,14 +5,14 @@
 */
 module ddsp.effect.digitaldelay;
 
-import ddsp.effect.aeffect;
+import ddsp.effect.effect;
 import ddsp.util.functions;
 
 /**
 * A general purpose Digital Delay with support for external feedback,
   fractional delay, and feedback path effects.
 */
-class DigitalDelay : AEffect
+class DigitalDelay : AudioEffect
 {
     import core.stdc.stdlib : malloc, free;
     import core.stdc.string : memset;
@@ -31,7 +31,7 @@ public:
         _readIndex = 0;
         _writeIndex = 0;
         
-        feedbackFX = makeVec!AEffect;
+        feedbackFX = makeVec!AudioEffect;
     }
     
     ~this() nothrow @nogc { free(buffer); }
@@ -130,7 +130,7 @@ public:
     
     void setUseExternalFeedback(bool b) nothrow @nogc { _useExternalFeedback = b; }
     
-    void addFeedbackEffect(AEffect effect) nothrow @nogc { feedbackFX.pushBack(effect); }
+    void addFeedbackEffect(AudioEffect effect) nothrow @nogc { feedbackFX.pushBack(effect); }
     
     void setFeedbackAmount(float feedback) nothrow @nogc { _feedback = feedback; }
     
@@ -162,7 +162,7 @@ protected:
     bool _useExternalFeedback;
     float _feedbackIn;
     
-    Vec!AEffect feedbackFX;
+    Vec!AudioEffect feedbackFX;
 
     float maxDelayTime = 3.0f;
 

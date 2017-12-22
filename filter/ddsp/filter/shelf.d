@@ -6,12 +6,12 @@
 module ddsp.filter.shelf;
 
 import ddsp.filter.biquad;
-import ddsp.effect.aeffect;
+import ddsp.effect.effect;
 
 import std.math;
 
 /// The equations for calculating the BiQuad Coefficients are based off of those from vinniefalco/DSPFilters
-class LowShelf : AEffect
+class LowShelf : AudioEffect
 {
 public:
 
@@ -109,7 +109,7 @@ unittest
 {
     import dplug.core.nogc;
     import dplug.core.alignedbuffer;
-    import ddsp.effect.aeffect;
+    import ddsp.effect.AudioEffect;
 
     Vec!LowShelf filters = makeVec!LowShelf;
     foreach(channel; 0..2)
@@ -120,7 +120,7 @@ unittest
         filters[channel].setGain(3.0f);
     }
 
-    //testEffect(AEffect effect, string name, size_t bufferSize = 20000, bool outputResults = false)
+    //testEffect(AudioEffect effect, string name, size_t bufferSize = 20000, bool outputResults = false)
     foreach(filter; filters)
         testEffect(filter, "LowShelf" , 20000, false);
 }

@@ -5,7 +5,7 @@
 */
 module ddsp.filter.biquad;
 
-import ddsp.effect.aeffect;
+import ddsp.effect.effect;
 
 const float pi = 3.14159265;
 
@@ -23,7 +23,7 @@ enum FilterType
 /**
 This class implements a generic biquad filter. Should be inherited by all filters.
 */
-class BiQuad : AEffect
+class BiQuad : AudioEffect
 {
     public:
 
