@@ -5,7 +5,7 @@
 */
 module ddsp.effect.dynamics;
 
-import ddsp.effect.aeffect;
+import ddsp.effect.effect;
 import ddsp.util.envelope;
 import ddsp.util.functions;
 
@@ -16,7 +16,7 @@ import std.math;
 
 /// Base class for dynamics processors such as compressor, limiter, expander, and gate.
 /// This class is useless on it's own.  It should be inherited from and have getNextSample overriden.
-class DynamicsProcessor : AEffect
+class DynamicsProcessor : AudioEffect
 {
 public:
 nothrow:

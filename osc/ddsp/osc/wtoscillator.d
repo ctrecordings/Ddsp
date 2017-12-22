@@ -5,7 +5,7 @@
 */
 module ddsp.osc.wtoscillator;
 
-import ddsp.effect.aeffect;
+import ddsp.effect.effect;
 
 const float pi = 3.14159265;
 
@@ -17,12 +17,11 @@ enum : int
     tri
 }
 
-class WTOscillator : AEffect
+class WTOscillator : AudioEffect
 {
     import std.math;
     import core.stdc.stdlib;
     import ddsp.util.functions;
-    import ddsp.effect.aeffect;
     
 public:
 
@@ -259,7 +258,7 @@ private:
 unittest
 {
     import dplug.core.nogc;
-    import ddsp.effect.aeffect;
+    import ddsp.effect.AudioEffect;
 
     WTOscillator osc = mallocNew!WTOscillator();
     osc.initialize(1000, 44100, wav);

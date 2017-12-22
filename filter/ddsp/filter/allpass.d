@@ -27,7 +27,7 @@ module ddsp.filter.allpass;
 
 import std.math;
 
-import ddsp.effect.aeffect;
+import ddsp.effect.effect;
 
 const float pi = 3.14159265;
 
@@ -36,7 +36,7 @@ const float pi = 3.14159265;
 /// frequency.  This is necessary for summing more than 2 bands created from
 /// Linkwitz-Riley filters.
 /// TODO: Inherit BiQuad directly to remove redundent code.
-class Allpass : AEffect
+class Allpass : AudioEffect
 {
 public:
 

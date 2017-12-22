@@ -5,14 +5,14 @@
 */
 module ddsp.osc.cfoscillator;
 
-import ddsp.effect.aeffect;
+import ddsp.effect.effect;
 
 import std.math;
 
 /**
 * Coupled-Form Oscillator (Gordon-Smith Oscillator)
 */
-class CFOscillator : AEffect
+class CFOscillator : AudioEffect
 {
 public:
 
@@ -76,7 +76,7 @@ private:
 unittest
 {
     import dplug.core.nogc;
-    import ddsp.effect.aeffect;
+    import ddsp.effect.AudioEffect;
 
     CFOscillator osc = mallocNew!CFOscillator;
 
