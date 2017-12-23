@@ -110,7 +110,7 @@ unittest
 {
     import dplug.core.nogc;
     import dplug.core.alignedbuffer;
-    import ddsp.effect.AudioEffect;
+    import ddsp.effect.effect;
 
     Vec!BandShelf filters = makeVec!BandShelf;
     foreach(channel; 0..2)

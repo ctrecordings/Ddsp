@@ -76,7 +76,7 @@ private:
 unittest
 {
     import dplug.core.nogc;
-    import ddsp.effect.AudioEffect;
+    import ddsp.effect.effect;
 
     CFOscillator osc = mallocNew!CFOscillator;
 

@@ -109,7 +109,7 @@ unittest
 {
     import dplug.core.nogc;
     import dplug.core.alignedbuffer;
-    import ddsp.effect.AudioEffect;
+    import ddsp.effect.effect;
 
     Vec!LowShelf filters = makeVec!LowShelf;
     foreach(channel; 0..2)
