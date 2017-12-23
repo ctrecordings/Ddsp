@@ -258,7 +258,7 @@ private:
 unittest
 {
     import dplug.core.nogc;
-    import ddsp.effect.AudioEffect;
+    import ddsp.effect.effect;
 
     WTOscillator osc = mallocNew!WTOscillator();
     osc.initialize(1000, 44100, wav);

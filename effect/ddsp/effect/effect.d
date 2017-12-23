@@ -5,7 +5,7 @@
 */
 module ddsp.effect.effect;
 
-import dplug.core.vec;
+import dplug.core.alignedbuffer;
 import dplug.core.nogc;
 
 /**
