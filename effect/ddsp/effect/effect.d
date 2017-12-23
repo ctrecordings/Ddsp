@@ -127,17 +127,6 @@ void testEffect(AudioEffect effect, string name, size_t bufferSize = 20000, bool
 
 }
 
-template effectCreator(alias effectName)
-{
-    Vec!effectName numChannels(int n) nothrow @nogc
-    {
-        Vec!effectName e = makeVec!effectName();
-        foreach(chan; 0..n)
-            e.pushBack(mallocNew!effectName());
-        return e;
-    }
-}
-
 unittest
 {
     import std.stdio;
