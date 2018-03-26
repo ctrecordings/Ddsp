@@ -6,7 +6,11 @@
 module ddsp.effect.moddelay;
 
 import ddsp.effect.effect;
+import ddsp.osc;
+import ddsp.effect.digitaldelay;
+import ddsp.util.memory;
 
+// This class is not implemented yet
 class ModDelay : AudioEffect
 {
 public:
@@ -15,7 +19,8 @@ nothrow:
 
     this()
     {
-
+        lfo = calloc!CFOscillator.init();
+        delay = calloc!DigitalDelay.init();
     }
 
     override float getNextSample(const float input)
@@ -28,5 +33,11 @@ nothrow:
 
     }
 private:
-    
+    float _mod_rate;
+    float _mod_depth;
+    float _feedback;
+    float _delay_offset;
+
+    CFOscillator lfo;
+    DigitalDelay delay;
 }

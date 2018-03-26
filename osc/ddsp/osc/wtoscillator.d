@@ -83,14 +83,12 @@ public:
         
     }
 
-    void initialize(float frequency, float sampleRate, int oscType, bool tableMode = true) nothrow @nogc
+    void initialize(float frequency, int oscType, bool tableMode = true) nothrow @nogc
     {
-        setFrequency(frequency, sampleRate);
+        setFrequency(frequency);
+        prevMode = _tableModeNormal;
         _tableModeNormal = tableMode;
-        prevMode = !_tableModeNormal;
         setOscType(oscType);
-        
-        
     }
     
     /**
@@ -128,6 +126,7 @@ public:
             for(int i = 0; i < 1024; ++i)
             {
                 float maxVal = 0.0f;
+                _waveTable[i] = 0;
                 switch(_oscType)
                 {
                     case wav:
@@ -165,7 +164,11 @@ public:
                         //TRI BAND-LIMITED
                         else
                         {
-                            _waveTable[i] = 0;
+                            for(int g = 0; g <=3; ++g)
+                            {
+                                double n = g;
+                                _waveTable[i] += pow(cast(float)-1.0, cast(float)n) * (1.0 / pow(cast(float)(2 * n + 1), cast(float)2.0)) * sin(2.0 * pi * (2.0 * n + 1) * i / 1024.0);
+                            }
                         }
                         break;
                     case sqr:
@@ -177,7 +180,11 @@ public:
                         //SQR BAND-LIMITED
                         else
                         {
-                            _waveTable[i] = 0;
+                            for(int g = 1; g <= 5; g += 2)
+                            {
+                                double n = g;
+                                _waveTable[i] += (1.0 / n) * sin(2.0 * pi * i * n / 1024.0);
+                            }
                         }
                         break;
                     default:
@@ -189,9 +196,9 @@ public:
         }
     }
 
-    void setFrequency(float frequency, float sampleRate) nothrow @nogc
+    void setFrequency(float frequency) nothrow @nogc
     {
-        _incVal = 1024.0f * frequency / sampleRate;
+        _incVal = 1024.0f * frequency / _sampleRate;
     }
     
     void setTableModeNormal()
