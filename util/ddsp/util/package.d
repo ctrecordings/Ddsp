@@ -6,3 +6,4 @@ public import ddsp.util.envelope;
 public import ddsp.util.functions;
 public import ddsp.util.time;
 public import ddsp.util.wave;
+public import ddsp.util.memory;

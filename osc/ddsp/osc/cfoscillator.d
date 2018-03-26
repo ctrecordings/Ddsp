@@ -15,17 +15,17 @@ import std.math;
 class CFOscillator : AudioEffect
 {
 public:
+nothrow:
+@nogc:
 
     this()
     {
         init = false;
     }
     
-    void initialize(float frequency, float sampleRate, float mix = 1.0f) nothrow @nogc
+    void initialize(float frequency) nothrow @nogc
     {
         fo = frequency;
-        _sampleRate = sampleRate;
-        _mix = mix;
         
         theta = 2 * PI * fo / _sampleRate;
         epsilon = 2 * sin(theta / 2);
@@ -40,7 +40,7 @@ public:
     
     void setFrequency(float frequency) nothrow @nogc
     {
-        initialize(frequency, _sampleRate);
+        initialize(frequency);
     }
     
     override float getNextSample(const float input) nothrow @nogc
@@ -51,11 +51,12 @@ public:
         yq1 = yq;
         yn1 = yn;
         
-        return (yn * _mix) + (input * (1 - _mix));
+        return yn;
     }
     
     override void reset() nothrow @nogc
     {
+        init = false;
         initialize(fo, _sampleRate);
     }
     
@@ -68,7 +69,6 @@ private:
     float epsilon;
     float theta;
     float fo;
-    float _mix;
     
     bool init;
 }
