@@ -57,7 +57,7 @@ nothrow:
     override void reset() nothrow @nogc
     {
         init = false;
-        initialize(fo, _sampleRate);
+        initialize(fo);
     }
     
 private:

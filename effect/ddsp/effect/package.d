@@ -10,3 +10,4 @@ public import ddsp.effect.compressor;
 public import ddsp.effect.dynamics;
 public import ddsp.effect.expander;
 public import ddsp.effect.digitaldelay;
+public import ddsp.effect.moddelay;
