@@ -79,8 +79,8 @@ unittest
     import ddsp.effect.effect;
 
     CFOscillator osc = mallocNew!CFOscillator;
-
-    osc.initialize(1000, 44100);
+    osc.setSampleRate(44100);
+    osc.setFrequency(1000);
 
     testEffect(osc, "Coupled-Form Oscillator", 20000, false);
 }
