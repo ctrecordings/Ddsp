@@ -12,3 +12,4 @@ dub.selections.json
 *.wav
 *.wave
 ddsp-test-library
+*.vscode
