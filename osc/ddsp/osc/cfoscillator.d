@@ -23,7 +23,7 @@ nothrow:
         init = false;
     }
     
-    void initialize(float frequency) nothrow @nogc
+    void setFrequency(float frequency) nothrow @nogc
     {
         fo = frequency;
         
@@ -36,11 +36,6 @@ nothrow:
             yq1 = cos(-1 * theta);
             init = true;
         }
-    }
-    
-    void setFrequency(float frequency) nothrow @nogc
-    {
-        initialize(frequency);
     }
     
     override float getNextSample(const float input) nothrow @nogc
@@ -57,7 +52,7 @@ nothrow:
     override void reset() nothrow @nogc
     {
         init = false;
-        initialize(fo);
+        setFrequency(fo);
     }
     
 private:
