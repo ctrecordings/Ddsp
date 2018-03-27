@@ -5,8 +5,7 @@ os:
   - linux
 
 d:
- - ldc-1.4.0
- - ldc-1.2.0
+ - ldc-1.8.0
  - dmd-beta
  - dmd-2.075.0
  - dmd-2.072.1
