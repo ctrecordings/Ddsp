@@ -17,6 +17,7 @@ Another important source is [MusicDSP.org](http://www.musicdsp.org)
 ### ddsp:effect
 - AudioEffect : base class for all effects
 - Dynamics: Compressor, Limiter, Expander, Gate
+- Modulated Delay: Generic ModDelay, Phaser, Flanger, Chorus
 - Digital Delay
 
 ### ddsp:filter
@@ -34,7 +35,5 @@ Another important source is [MusicDSP.org](http://www.musicdsp.org)
 Ddsp depends on `dplug:core` for use of it's `@nogc` capabilities.  The D Runtime is only used for testing purposes within the library.  This is to make it compatible with dplug but it can be used in any D framework/application.
 
 Many more components are planned to be added soon.
-- Generic Modulated Delay
-- Phaser, Flanger, Chorus, Tremolo
 - Reverb
 - Modulated Filter

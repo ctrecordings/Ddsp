@@ -55,14 +55,14 @@ public:
     void setDelay(float msDelay) nothrow @nogc
     {
         _delayInSamples = msToSamples(msDelay, _sampleRate);
-		if(_delayInSamples > _size)
-		{
-			reset();
-		}
-		else
-		{
-			resetIndices();
-		}
+        if(_delayInSamples > _size)
+        {
+            reset();
+        }
+        else
+        {
+            resetIndices();
+        }
     }
 
     /// Sets delay time, feedback, and mix
@@ -76,14 +76,14 @@ public:
     override float getNextSample(const float input) nothrow @nogc
     {
         float xn = input;
-        float yn = buffer[_readIndex];
+        float yn = buffer[cast(size_t)_readIndex];
         
         if(_readIndex == _writeIndex && _delayInSamples < 1.0f)
         {
             yn = xn;
         }
         
-        size_t _readIndex_1 = _readIndex - 1;
+        size_t _readIndex_1 = cast(size_t)(_readIndex - 1);
         if(_readIndex_1 < 0)
             _readIndex_1 = _size - 1;
         
@@ -99,9 +99,9 @@ public:
             yn = interp;
         
         if(!_useExternalFeedback)
-            buffer[_writeIndex] = xn + _feedback * yn;
+            buffer[cast(size_t)_writeIndex] = xn + _feedback * yn;
         else
-            buffer[_writeIndex] = xn + _feedbackIn * _feedback;
+            buffer[cast(size_t)_writeIndex] = xn + _feedbackIn * _feedback;
         
         float output = _mix * yn + (1.0 - _mix) * xn;
         
@@ -116,19 +116,19 @@ public:
     //set all elements in the buffer to 0, and reset indices.
     override void reset() nothrow @nogc
     {
-		memset(buffer, 0, _size * float.sizeof);
+        memset(buffer, 0, _size * float.sizeof);
 
         resetIndices();
     }
 
-	void resetIndices() nothrow @nogc
-	{
-		_readIndex = cast(long)(_writeIndex - cast(long)_delayInSamples);
-		if(_readIndex < 0)
-			_readIndex += _size;
-	}
+    void resetIndices() nothrow @nogc
+    {
+        _readIndex = cast(long)(_writeIndex - cast(long)_delayInSamples);
+        if(_readIndex < 0)
+            _readIndex += _size;
+    }
     
-    float getCurrentFeedbackOutput() nothrow @nogc { return _feedback * buffer[_readIndex]; }
+    float getCurrentFeedbackOutput() nothrow @nogc { return _feedback * buffer[cast(size_t)_readIndex]; }
     
     float getFeedbackAmount() nothrow @nogc { return _feedback; }
     

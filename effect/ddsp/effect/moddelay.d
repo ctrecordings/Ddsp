@@ -37,10 +37,10 @@ nothrow:
     {
         float startDelay = _min_delay + _delay_offset;
         float lfoOffset = _mod_depth * ((lfoValue + 1) / 2 * (_max_delay - _min_delay)) + _min_delay;
-		return lfoOffset + startDelay;
+        return lfoOffset + startDelay;
     }
 
-	/// Must be set before processing audio
+    /// Must be set before processing audio
     void setDelayRange(float minDelay, float maxDelay)
     {
         _min_delay = minDelay;
@@ -76,7 +76,8 @@ nothrow:
 
     override void reset()
     {
-
+        lfo.reset();
+        delay.reset();
     }
 private:
     float _mod_rate;
@@ -90,4 +91,97 @@ private:
 
     WTOscillator lfo;
     DigitalDelay delay;
+}
+
+class Flanger : AudioEffect
+{
+public:
+nothrow:
+@nogc:
+
+    this()
+    {
+        _modDelay = calloc!ModDelay.init();
+    }
+
+    void setParams(float modDepth, float modRate, int oscType = 0)
+    {
+        _modDelay.setParams(modRate, modDepth, 0.5, 1.0, oscType);
+        _modDelay.setDelayRange(0, 7);
+    }
+
+    override float getNextSample(const float input)
+    {
+        return _modDelay.getNextSample(input);
+    }
+
+    override void reset()
+    {
+        _modDelay.reset();
+    }
+
+private:
+    ModDelay _modDelay;
+}
+
+class Vibrato : AudioEffect
+{
+public:
+nothrow:
+@nogc:
+
+    this()
+    {
+        _modDelay = calloc!ModDelay.init();
+    }
+
+    void setParams(float modDepth, float modRate, int oscType = 0)
+    {
+        _modDelay.setParams(modRate, modDepth, 1.0, 0, oscType);
+        _modDelay.setDelayRange(0, 7);
+    }
+
+    override float getNextSample(const float input)
+    {
+        return _modDelay.getNextSample(input);
+    }
+
+    override void reset()
+    {
+        _modDelay.reset();
+    }
+
+private:
+    ModDelay _modDelay;
+}
+
+class Chorus : AudioEffect
+{
+public:
+nothrow:
+@nogc:
+
+    this()
+    {
+        _modDelay = calloc!ModDelay.init();
+    }
+
+    void setParams(float modDepth, float modRate, int oscType = 0)
+    {
+        _modDelay.setParams(modRate, modDepth, 0.5, 0.0, oscType);
+        _modDelay.setDelayRange(5, 30);
+    }
+
+    override float getNextSample(const float input)
+    {
+        return _modDelay.getNextSample(input);
+    }
+
+    override void reset()
+    {
+        _modDelay.reset();
+    }
+
+private:
+    ModDelay _modDelay;
 }
