@@ -57,7 +57,7 @@ public:
         _delayInSamples = msToSamples(msDelay, _sampleRate);
         //assert(_delayInSamples <= cast(float)_size);
         if(_prevDelay != _delayInSamples)
-            reset();
+        reset();
         _prevDelay = _delayInSamples;
     }
 
