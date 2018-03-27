@@ -83,7 +83,7 @@ public:
         
     }
 
-    void initialize(float frequency, int oscType, bool tableMode = true) nothrow @nogc
+    void setParams(float frequency, int oscType, bool tableMode = true) nothrow @nogc
     {
         setFrequency(frequency);
         prevMode = _tableModeNormal;
