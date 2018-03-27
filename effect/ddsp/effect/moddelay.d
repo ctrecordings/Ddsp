@@ -12,7 +12,8 @@ import ddsp.util.memory;
 
 import std.math;
 
-// This class is not implemented yet
+/// General purpose class for Modulated Delay effects. This class is used with 
+/// contraints on depth, offset, mix, and feedback to create other effects. (Flanger, Chorus, Tremolo, etc)
 class ModDelay : AudioEffect
 {
 public:
@@ -35,17 +36,18 @@ nothrow:
     float calcDelayOffset(float lfoValue)
     {
         float startDelay = _min_delay + _delay_offset;
-        float lfoOffset = _mod_depth * (abs(lfoValue) * (_max_delay - _min_delay)) + _min_delay;
+        float lfoOffset = _mod_depth * ((lfoValue + 1) / 2 * (_max_delay - _min_delay)) + _min_delay;
 		return lfoOffset + startDelay;
     }
 
+	/// Must be set before processing audio
     void setDelayRange(float minDelay, float maxDelay)
     {
         _min_delay = minDelay;
         _max_delay = maxDelay;
     }
 
-    void setParams(float rate, float depth, float mix, float feedback, int offset)
+    void setParams(float rate, float depth, float mix, float feedback, int offset, int modType = 0)
     {
         _mod_rate = rate;
         _mod_depth = depth;
@@ -54,7 +56,7 @@ nothrow:
         _mix = mix;
 
         //Frequency, sin, not bandlimited
-        lfo.setParams(rate, 0, true);
+        lfo.setParams(rate, modType, true);
         delay.setParams(0, feedback, mix);
     }
 

@@ -55,10 +55,14 @@ public:
     void setDelay(float msDelay) nothrow @nogc
     {
         _delayInSamples = msToSamples(msDelay, _sampleRate);
-        //assert(_delayInSamples <= cast(float)_size);
-        if(_prevDelay != _delayInSamples)
-        reset();
-        _prevDelay = _delayInSamples;
+		if(_delayInSamples > _size)
+		{
+			reset();
+		}
+		else
+		{
+			resetIndices();
+		}
     }
 
     /// Sets delay time, feedback, and mix
@@ -114,11 +118,15 @@ public:
     {
 		memset(buffer, 0, _size * float.sizeof);
 
-        _writeIndex = 0;
-        _readIndex = _size - cast(size_t)_delayInSamples;
-        if(_readIndex < 0)
-            _readIndex += _size;
+        resetIndices();
     }
+
+	void resetIndices() nothrow @nogc
+	{
+		_readIndex = cast(long)(_writeIndex - cast(long)_delayInSamples);
+		if(_readIndex < 0)
+			_readIndex += _size;
+	}
     
     float getCurrentFeedbackOutput() nothrow @nogc { return _feedback * buffer[_readIndex]; }
     
@@ -154,10 +162,9 @@ protected:
     size_t _size;
     float _delayInSamples;
     float _delayInMS;
-    float _prevDelay;
     
-    size_t _writeIndex;
-    size_t _readIndex;
+    long _writeIndex;
+    long _readIndex;
     
     bool _useExternalFeedback;
     float _feedbackIn;
