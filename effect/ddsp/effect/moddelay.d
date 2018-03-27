@@ -104,10 +104,16 @@ nothrow:
         _modDelay = calloc!ModDelay.init();
     }
 
-    void setParams(float modDepth, float modRate, int oscType = 0)
+	override void setSampleRate(float sampleRate)
+	{
+		_sampleRate = sampleRate;
+		_modDelay.setSampleRate(_sampleRate);
+		_modDelay.setDelayRange(0, 7);
+	}
+
+    void setParams(float modRate, float modDepth, int oscType = 0)
     {
-        _modDelay.setParams(modRate, modDepth, 0.5, 1.0, oscType);
-        _modDelay.setDelayRange(0, 7);
+        _modDelay.setParams(modRate, modDepth, 0.5, 0.5, 0, oscType);
     }
 
     override float getNextSample(const float input)
@@ -135,10 +141,16 @@ nothrow:
         _modDelay = calloc!ModDelay.init();
     }
 
-    void setParams(float modDepth, float modRate, int oscType = 0)
+	override void setSampleRate(float sampleRate)
+	{
+		_sampleRate = sampleRate;
+		_modDelay.setSampleRate(_sampleRate);
+		_modDelay.setDelayRange(0, 7);
+	}
+
+    void setParams(float modRate, float modDepth, int oscType = 0)
     {
-        _modDelay.setParams(modRate, modDepth, 1.0, 0, oscType);
-        _modDelay.setDelayRange(0, 7);
+        _modDelay.setParams(modRate, modDepth, 1.0, 0.0, 0, oscType);
     }
 
     override float getNextSample(const float input)
@@ -166,10 +178,16 @@ nothrow:
         _modDelay = calloc!ModDelay.init();
     }
 
-    void setParams(float modDepth, float modRate, int oscType = 0)
+	override void setSampleRate(float sampleRate)
+	{
+		_sampleRate = sampleRate;
+		_modDelay.setSampleRate(_sampleRate);
+		_modDelay.setDelayRange(5, 30);
+	}
+
+    void setParams(float modRate, float modDepth, int oscType = 0)
     {
-        _modDelay.setParams(modRate, modDepth, 0.5, 0.0, oscType);
-        _modDelay.setDelayRange(5, 30);
+        _modDelay.setParams(modRate, modDepth, 0.5, 0.0, 0, oscType);
     }
 
     override float getNextSample(const float input)
