@@ -268,6 +268,7 @@ unittest
     import ddsp.effect.effect;
 
     WTOscillator osc = mallocNew!WTOscillator();
-    osc.initialize(1000, 44100, wav);
+    osc.setSampleRate(44100);
+    osc.setParams(1000, wav, true);
     testEffect(osc, "WTOscillator", 44100, false);
 }
