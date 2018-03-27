@@ -118,9 +118,7 @@ public:
         float ms2 = 1.0f / 512.0f;
         float bs2 = -1.0f;
         
-        if(_oscType != oscType || _tableModeNormal != prevMode )
-        {
-            _oscType = oscType;
+        _oscType = oscType;
             prevMode = _tableModeNormal;
             
             for(int i = 0; i < 1024; ++i)
@@ -193,7 +191,6 @@ public:
                         break;
                 }
             }
-        }
     }
 
     void setFrequency(float frequency) nothrow @nogc
