@@ -35,6 +35,8 @@ public:
         _sampleRate = sampleRate;
         reset();
     }
+
+    float SampleRate() @property { return _sampleRate; }
     
 protected:
     float _sampleRate;
@@ -55,6 +57,14 @@ public:
     void addEffect(AudioEffect effect)
     {
         _fxChain.pushBack(effect);
+    }
+
+    override void setSampleRate(float sampleRate)
+    {
+        foreach(effect; _fxChain)
+        {
+            effect.setSampleRate(sampleRate);
+        }
     }
 
     /// Override from AudioEffect.  Processes the input through each effect
