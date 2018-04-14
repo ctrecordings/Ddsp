@@ -66,8 +66,7 @@ nothrow:
             }
         }
         doLowpassOut();
-        T output = buffer[0];
-        return output;
+        return buffer[0];
     }
 
     void upSample(const float input)
@@ -82,7 +81,12 @@ nothrow:
 
     override void reset()
     {
-
+        lowpassIn.reset();
+        lowpassOut.reset();
+        foreach(effect; effects)
+        {
+            effect.reset();
+        }
     }
 
     /// Note that buffer includes previous sample and current sample so its size is 2^factor + 1
@@ -164,7 +168,7 @@ unittest
     class Distorter : AudioEffect
     {
         private import std.math;
-        override float getNextSample(const float input) { return sin(input);}
+        override float getNextSample(const float input) { return sin(input * PI_2);}
         override void reset() {}
     }
 
