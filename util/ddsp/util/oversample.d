@@ -177,7 +177,6 @@ unittest
     sampler = new OverSampler!float();
     sampler.setSampleFactor(2);
     sampler.setSampleRate(44100);
-    writeln(sampler.Nyquist);
     sampler.insertEffect(distorter);
-    testEffect(sampler, "Oversampler", 20000 * 4, true);
+    testEffect(sampler, "Oversampler", 20000 * 4, false);
 }

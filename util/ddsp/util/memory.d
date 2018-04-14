@@ -32,3 +32,24 @@ unittest
     Compressor[] compChannel = calloc!Compressor.numChannels(2);
     Compressor comp = calloc!Compressor.init();
 }
+
+/// Allocates a slice of memory of type T and with the specified length.
+/// Since dynamic arrays cannot be 
+T[] callocSlice(T)(size_t length) nothrow @nogc
+{
+    T* mem = cast(T*)malloc(T.sizeof * length);
+    return mem[0..length];
+}
+
+/// Free memory from slice created with callocSlice
+void freeSlice(T)(T[] slice)
+{
+    free(cast(T*)slice);
+}
+
+unittest
+{
+    import std.stdio;
+    char[] s = callocSlice!char(200);
+    s.freeSlice();
+}
