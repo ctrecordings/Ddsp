@@ -55,6 +55,6 @@
         }
     ],
     "dependencies": {
-        "dplug:core": "~>6.0.7"
+        "dplug:core": ">=7.0.0"
     }
 }
