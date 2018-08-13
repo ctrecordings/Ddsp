@@ -16,7 +16,7 @@ class DigitalDelay : AudioEffect
 {
     import core.stdc.stdlib : malloc, free;
     import core.stdc.string : memset;
-    import dplug.core.alignedbuffer;
+    import dplug.core.vec;
     
 public:
 

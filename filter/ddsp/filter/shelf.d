@@ -108,7 +108,7 @@ private:
 unittest
 {
     import dplug.core.nogc;
-    import dplug.core.alignedbuffer;
+    import dplug.core.vec;
     import ddsp.effect.effect;
 
     Vec!LowShelf filters = makeVec!LowShelf;
