@@ -90,8 +90,7 @@ public:
 
     void setFrequency(float frequency) nothrow @nogc
     {
-        if(_frequency != frequency)
-            initialize(frequency, _sampleRate);
+        _frequency = frequency;
     }
 
 private:
