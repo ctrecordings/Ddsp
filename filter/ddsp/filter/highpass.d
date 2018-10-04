@@ -12,6 +12,9 @@ import std.math;
 class HighpassO1 : BiQuad
 {
 public:
+nothrow:
+@nogc:
+
     override void calcCoefficients() nothrow @nogc
     {
         _thetac = 2 * PI * _frequency / _sampleRate;
@@ -87,6 +90,9 @@ private:
 class LinkwitzRileyHP : BiQuad
 {
 public:
+nothrow:
+@nogc:
+
     this()
     {
         super();
