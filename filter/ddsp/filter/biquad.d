@@ -56,7 +56,6 @@ class BiQuad : AudioEffect
                 _frequency = frequency;
                 calcCoefficients();
             }
-            reset();
         }
     
         override void setSampleRate(float sampleRate) nothrow @nogc

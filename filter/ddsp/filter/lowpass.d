@@ -84,6 +84,8 @@ private:
 class LinkwitzRileyLP : BiQuad
 {
 public:
+nothrow:
+@nogc:
     this()
     {
         super();
