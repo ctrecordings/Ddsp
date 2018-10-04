@@ -74,13 +74,6 @@ public:
 
     override void reset() nothrow @nogc
     {
-        _a0 = 0;
-        _a1 = 0;
-        _a2 = 0;
-        _b0 = 0;
-        _b1 = 0;
-        _b2 = 0;
-
         _w = 0;
         _w1 = 0;
         _w2 = 0;
@@ -90,7 +83,7 @@ public:
 
     void setFrequency(float frequency) nothrow @nogc
     {
-        _frequency = frequency;
+        initialize(frequency);
     }
 
 private:
