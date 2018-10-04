@@ -87,14 +87,21 @@ private:
 class LinkwitzRileyHP : BiQuad
 {
 public:
+    this()
+    {
+        super();
+    }
+
     override void calcCoefficients() nothrow @nogc
     {
-        _theta = PI * _frequency / _sampleRate;
-        _omega = PI * _frequency;
+        _theta = pi * _frequency / _sampleRate;
+        _omega = pi * _frequency;
         _kappa = _omega / tan(_theta);
         _delta = _kappa * _kappa + _omega * _omega + 2 * _kappa * _omega;
+
         _a0 = (_kappa * _kappa) / _delta;
         _a1 = -2 * _a0;
+
         _a2 = _a0;
         _b1 = (-2 * _kappa * _kappa + 2 * _omega * _omega) / _delta;
         _b2 = (-2 * _kappa * _omega + _kappa * _kappa + _omega * _omega) / _delta;
