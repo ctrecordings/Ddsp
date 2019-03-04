@@ -4,7 +4,7 @@
 		"Ethan Reker"
 	],
 	"dependencies": {
-		"ddsp": "~>1.0.1",
+		"ddsp": {"path": "../.."},
 		"wave-d": "~>1.0.6"
 	},
 	"description": "D",

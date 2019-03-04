@@ -20,7 +20,17 @@ public:
     */
     abstract T getNextSample(const T input) nothrow @nogc;
     
-    
+    /**
+     * Takes a set of buffers and processes them with getNextSample()
+     * In the future this could possibly be optimized
+     */
+    void processBuffers(const (T)* inputBuffer, T* outputBuffer, int numSamples)
+    {
+        foreach(sample; 0..numSamples)
+        {
+            outputBuffer[sample] = getNextSample(inputBuffer[sample]);
+        }
+    }
     
     /**
     * Should be used to free any delay elements or do any setup before play begins.

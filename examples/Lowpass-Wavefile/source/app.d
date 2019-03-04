@@ -16,7 +16,7 @@ import ddsp.filter.lowpass;
 void main(string[] args)
 {
 	/++ Declare a Butterworth lowpass filter ++/
-	ButterworthLP filter = new ButterworthLP();
+	ButterworthLP!float filter = new ButterworthLP!float();
 
 	writeln("Ddsp - Lowpass Example");
 
