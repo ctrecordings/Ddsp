@@ -15,13 +15,13 @@ import std.algorithm;
 import std.math;
 
 /// Basic compressor
-class Compressor : DynamicsProcessor
+class Compressor(T) : DynamicsProcessor!T
 {
 public:
 nothrow:
 @nogc:
     
-    override float getNextSample(const float input)
+    override T getNextSample(const T input)
     {
         detector.detect(input * 4);
 
@@ -72,7 +72,7 @@ private:
 }
 
 /// Basic look-ahead limiter that is based on the compressor from before.
-class Limiter : Compressor
+class Limiter(T) : Compressor!T
 {
     private import ddsp.util.buffer;
     private import dplug.core.nogc;
@@ -91,7 +91,7 @@ public:
         _limit = true;
     }
     
-    override float getNextSample(const float input)
+    override T getNextSample(const T input)
     {
         _buffer.write(input);
         float lookAheadOutput = _buffer.read();

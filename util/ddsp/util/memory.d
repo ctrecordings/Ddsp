@@ -29,8 +29,8 @@ unittest
 {
     import ddsp.effect.compressor;
 
-    Compressor[] compChannel = calloc!Compressor.numChannels(2);
-    Compressor comp = calloc!Compressor.init();
+    Compressor!float[] compChannel = calloc!(Compressor!float).numChannels(2);
+    Compressor!float comp = calloc!(Compressor!float).init();
 }
 
 /// Allocates a slice of memory of type T and with the specified length.

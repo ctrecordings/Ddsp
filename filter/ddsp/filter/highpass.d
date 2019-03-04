@@ -9,7 +9,7 @@ import ddsp.filter.biquad;
 import std.math;
 
 /// First order highpass filter
-class HighpassO1 : BiQuad
+class HighpassO1(T) : BiQuad!T
 {
 public:
 nothrow:
@@ -32,7 +32,7 @@ private:
 }
 
 /// Second order highpass filter
-class HighpassO2 : BiQuad
+class HighpassO2(T) : BiQuad!T
 {
 public:
     void setQualityFactor(float Q) nothrow @nogc
@@ -65,7 +65,7 @@ private:
 }
 
 /// Second order butterworth highpass filter
-class ButterworthHP : BiQuad
+class ButterworthHP(T) : BiQuad!T
 {
 public:
     this() nothrow @nogc
@@ -87,7 +87,7 @@ private:
 }
 
 /// Second order LinkwitzRiley highpass filter
-class LinkwitzRileyHP : BiQuad
+class LinkwitzRileyHP(T) : BiQuad!T
 {
 public:
 nothrow:

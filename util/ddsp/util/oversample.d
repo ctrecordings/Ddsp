@@ -9,7 +9,7 @@ import ddsp.filter.lowpass : LinkwitzRileyLP;
 
 import dplug.core.vec;
 
-class OverSampler(T) : AudioEffect
+class OverSampler(T) : AudioEffect!T
 {
 public:
 nothrow:
@@ -17,10 +17,10 @@ nothrow:
 
     this()
     {
-        lowpassIn = calloc!LinkwitzRileyLP.init();
-        lowpassOut = calloc!LinkwitzRileyLP.init();
+        lowpassIn = calloc!(LinkwitzRileyLP!T).init();
+        lowpassOut = calloc!(LinkwitzRileyLP!T).init();
 
-        effects = makeVec!AudioEffect();
+        effects = makeVec!(AudioEffect!T)();
     }
 
     this(uint factor)
@@ -54,7 +54,7 @@ nothrow:
         }
     }
 
-    override float getNextSample(const float input)
+    override T getNextSample(const T input)
     {
         upSample(input);
         doLowpassIn();
@@ -100,7 +100,7 @@ nothrow:
         return nyquistFrequency;
     }
 
-    void insertEffect(AudioEffect effect)
+    void insertEffect(AudioEffect!T effect)
     {
         effects.pushBack(effect);
     }
@@ -111,10 +111,10 @@ private:
     T* buffer;
     long nyquistFrequency;
 
-    LinkwitzRileyLP lowpassIn;
-    LinkwitzRileyLP lowpassOut;
+    LinkwitzRileyLP!T lowpassIn;
+    LinkwitzRileyLP!T lowpassOut;
 
-    Vec!AudioEffect effects;
+    Vec!(AudioEffect!T) effects;
 
     void initializeBuffer()
     {
@@ -165,14 +165,14 @@ unittest
 
     import ddsp.effect.effect : testEffect;
 
-    class Distorter : AudioEffect
+    class Distorter(T) : AudioEffect!T
     {
         private import std.math;
-        override float getNextSample(const float input) { return sin(input * PI_2);}
+        override T getNextSample(const T input) { return sin(input * PI_2);}
         override void reset() {}
     }
 
-    Distorter distorter = calloc!Distorter.init();
+    Distorter!float distorter = calloc!(Distorter!float).init();
 
     sampler = new OverSampler!float();
     sampler.setSampleFactor(2);

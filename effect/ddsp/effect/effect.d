@@ -11,14 +11,14 @@ import dplug.core.nogc;
 /**
 * Should be inherited by all Audio Effect classes to allow for batch processing
 */
-abstract class AudioEffect
+abstract class AudioEffect(T)
 {
 public:
     
     /**
     * Process a sample that is passed to the processor, and return the next sample.
     */
-    abstract float getNextSample(const float input) nothrow @nogc;
+    abstract T getNextSample(const T input) nothrow @nogc;
     
     
     
@@ -44,7 +44,7 @@ protected:
 
 /// Holds a list of AudioEffects.  getNextSample(input)
 /// call getNextSample(input) on each effect in the chain
-class FXChain : AudioEffect
+class FXChain(T) : AudioEffect!T
 {
 public:
 
@@ -69,7 +69,7 @@ public:
 
     /// Override from AudioEffect.  Processes the input through each effect
     /// and passes the result to the next effect.
-    override float getNextSample(const float input) nothrow @nogc
+    override T getNextSample(const T input) nothrow @nogc
     {
         float output = input;
         foreach(AudioEffect e; _fxChain)
@@ -101,7 +101,7 @@ private:
 * size_t bufferSize : number of samples to be processed.
 * bool outputResults : determines if output should be printed.
 */
-void testEffect(AudioEffect effect, string name, size_t bufferSize = 20000, bool outputResults = false)
+void testEffect(AudioEffect!float effect, string name, size_t bufferSize = 20000, bool outputResults = false)
 {
     import std.stdio;
     import std.random;

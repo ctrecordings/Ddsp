@@ -36,7 +36,7 @@ const float pi = 3.14159265;
 /// frequency.  This is necessary for summing more than 2 bands created from
 /// Linkwitz-Riley filters.
 /// TODO: Inherit BiQuad directly to remove redundent code.
-class Allpass : AudioEffect
+class Allpass(T) : AudioEffect!T
 {
 public:
 
@@ -61,7 +61,7 @@ public:
         _b2 = (1 + AL) / _a0;
     }
 
-    override float getNextSample(const float input)  nothrow @nogc
+    override T getNextSample(const T input)  nothrow @nogc
     {
         _w = input - _a1 * _w1 - _a2 * _w2;
         _yn = _b0 * _w + _b1 *_w1 + _b2 * _w2;
@@ -107,7 +107,7 @@ unittest
 {
     import dplug.core.nogc;
     
-    Allpass f = mallocNew!Allpass();
+    Allpass!float f = mallocNew!(Allpass!float)();
     f.setSampleRate(44100);
     f.setFrequency(10000);
     testEffect(f, "Allpass", 44100 * 2, false);

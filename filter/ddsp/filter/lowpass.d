@@ -10,7 +10,7 @@ import ddsp.filter.biquad;
 import std.math;
 
 /// First order lowpass filter
-class LowpassO1 : BiQuad
+class LowpassO1(T) : BiQuad!T
 {
 public:
     override void calcCoefficients() nothrow @nogc
@@ -31,7 +31,7 @@ private:
 }
 
 /// Second order lowpass filter
-class LowpassO2 : BiQuad
+class LowpassO2(T) : BiQuad!T
 {
 public:
     void setQualityFactor(float Q) nothrow @nogc
@@ -64,7 +64,7 @@ private:
 }
 
 /// Second order butterworth lowpass filter
-class ButterworthLP : BiQuad
+class ButterworthLP(T) : BiQuad!T
 {
 public:
     override void calcCoefficients() nothrow @nogc
@@ -81,7 +81,7 @@ private:
 }
 
 //Second order linkwitz-riley lowpass filter
-class LinkwitzRileyLP : BiQuad
+class LinkwitzRileyLP(T) : BiQuad!T
 {
 public:
 nothrow:

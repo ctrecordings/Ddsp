@@ -11,7 +11,7 @@ import ddsp.effect.effect;
 import std.math;
 
 /// The equations for calculating the BiQuad Coefficients are based off of those from vinniefalco/DSPFilters
-class BandShelf : AudioEffect
+class BandShelf(T) : AudioEffect!T
 {
 public:
 
@@ -24,7 +24,7 @@ public:
         }
     }
 
-    override float getNextSample(const float input)  nothrow @nogc
+    override T getNextSample(const T input)  nothrow @nogc
     {
         _w = input - _a1 * _w1 - _a2 * _w2;
         _yn = _b0 * _w + _b1 *_w1 + _b2 * _w2;
@@ -112,10 +112,10 @@ unittest
     import dplug.core.vec;
     import ddsp.effect.effect;
 
-    Vec!BandShelf filters = makeVec!BandShelf;
+    Vec!(BandShelf!float) filters = makeVec!(BandShelf!float);
     foreach(channel; 0..2)
     {
-        filters.pushBack(mallocNew!BandShelf);
+        filters.pushBack(mallocNew!(BandShelf!float));
         filters[channel].setSampleRate(44100.0f);
         filters[channel].setFrequency(150.0f);
         filters[channel].setGain(3.0f);

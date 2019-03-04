@@ -17,7 +17,7 @@ enum : int
     tri
 }
 
-class WTOscillator : AudioEffect
+class WTOscillator(T) : AudioEffect!T
 {
     import std.math;
     import core.stdc.stdlib;
@@ -221,7 +221,7 @@ public:
     *   Note: only returns single phase output. To get quadrature phase output
     *   use `void doOscillate(&float, &float)`
     */
-    override float getNextSample(const float input) nothrow @nogc
+    override T getNextSample(const T input) nothrow @nogc
     {
         currentSample = 0;
         currentQuadPhaseSample = 0;
@@ -264,7 +264,7 @@ unittest
     import dplug.core.nogc;
     import ddsp.effect.effect;
 
-    WTOscillator osc = mallocNew!WTOscillator();
+    WTOscillator!float osc = mallocNew!(WTOscillator!float)();
     osc.setSampleRate(44100);
     osc.setParams(1000, wav, true);
     testEffect(osc, "WTOscillator", 44100, false);

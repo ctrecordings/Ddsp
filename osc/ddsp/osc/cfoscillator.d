@@ -12,7 +12,7 @@ import std.math;
 /**
 * Coupled-Form Oscillator (Gordon-Smith Oscillator)
 */
-class CFOscillator : AudioEffect
+class CFOscillator(T) : AudioEffect!T
 {
 public:
 nothrow:
@@ -38,7 +38,7 @@ nothrow:
         }
     }
     
-    override float getNextSample(const float input) nothrow @nogc
+    override T getNextSample(const T input) nothrow @nogc
     {
         yq = yq1-epsilon * yn1;
         yn = epsilon * yq + yn1;
@@ -73,7 +73,7 @@ unittest
     import dplug.core.nogc;
     import ddsp.effect.effect;
 
-    CFOscillator osc = mallocNew!CFOscillator;
+    CFOscillator!float osc = mallocNew!(CFOscillator!float);
     osc.setSampleRate(44100);
     osc.setFrequency(1000);
 

@@ -14,7 +14,7 @@ import std.math;
 
 /// General purpose class for Modulated Delay effects. This class is used with 
 /// contraints on depth, offset, mix, and feedback to create other effects. (Flanger, Chorus, Tremolo, etc)
-class ModDelay : AudioEffect
+class ModDelay(T) : AudioEffect!T
 {
 public:
 nothrow:
@@ -60,7 +60,7 @@ nothrow:
         delay.setParams(0, feedback, mix);
     }
 
-    override float getNextSample(const float input)
+    override T getNextSample(const T input)
     {
         float fYn = 0.0;
         float fYqn = 0.0;
@@ -93,7 +93,7 @@ private:
     DigitalDelay delay;
 }
 
-class Flanger : AudioEffect
+class Flanger(T) : AudioEffect!T
 {
 public:
 nothrow:
@@ -130,7 +130,7 @@ private:
     ModDelay _modDelay;
 }
 
-class Vibrato : AudioEffect
+class Vibrato(T) : AudioEffect!T
 {
 public:
 nothrow:
@@ -153,7 +153,7 @@ nothrow:
         _modDelay.setParams(modRate, modDepth, 1.0, 0.0, 0, oscType);
     }
 
-    override float getNextSample(const float input)
+    override T getNextSample(const T input)
     {
         return _modDelay.getNextSample(input);
     }
@@ -167,7 +167,7 @@ private:
     ModDelay _modDelay;
 }
 
-class Chorus : AudioEffect
+class Chorus(T) : AudioEffect!T
 {
 public:
 nothrow:
@@ -190,7 +190,7 @@ nothrow:
         _modDelay.setParams(modRate, modDepth, 0.5, 0.0, 0, oscType);
     }
 
-    override float getNextSample(const float input)
+    override T getNextSample(const T input)
     {
         return _modDelay.getNextSample(input);
     }

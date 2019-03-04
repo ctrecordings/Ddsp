@@ -12,7 +12,7 @@ import ddsp.util.functions;
 * A general purpose Digital Delay with support for external feedback,
   fractional delay, and feedback path effects.
 */
-class DigitalDelay : AudioEffect
+class DigitalDelay(T) : AudioEffect!T
 {
     import core.stdc.stdlib : malloc, free;
     import core.stdc.string : memset;
@@ -31,7 +31,7 @@ public:
         _readIndex = 0;
         _writeIndex = 0;
         
-        feedbackFX = makeVec!AudioEffect;
+        feedbackFX = makeVec!(AudioEffect!T);
     }
     
     ~this() nothrow @nogc { free(buffer); }
@@ -73,7 +73,7 @@ public:
         setMixAmount(mix);
     }
     
-    override float getNextSample(const float input) nothrow @nogc
+    override T getNextSample(const T input) nothrow @nogc
     {
         float xn = input;
         float yn = buffer[cast(size_t)_readIndex];
@@ -138,7 +138,7 @@ public:
     
     void setUseExternalFeedback(bool b) nothrow @nogc { _useExternalFeedback = b; }
     
-    void addFeedbackEffect(AudioEffect effect) nothrow @nogc { feedbackFX.pushBack(effect); }
+    void addFeedbackEffect(AudioEffect!T effect) nothrow @nogc { feedbackFX.pushBack(effect); }
     
     void setFeedbackAmount(float feedback) nothrow @nogc { _feedback = feedback; }
     
@@ -169,7 +169,7 @@ protected:
     bool _useExternalFeedback;
     float _feedbackIn;
     
-    Vec!AudioEffect feedbackFX;
+    Vec!(AudioEffect!T) feedbackFX;
 
     float maxDelayTime = 3.0f;
 
@@ -179,7 +179,7 @@ unittest
 {
     import dplug.core.nogc;
     
-    DigitalDelay d = mallocNew!DigitalDelay();
+    DigitalDelay!float d = mallocNew!(DigitalDelay!float)();
     //d.initialize(44100);
     //d.update(22050, 0.5, 0.5);
     //testEffect(d, "DDelay", 44100 * 2, false);

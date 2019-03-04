@@ -23,7 +23,7 @@ enum FilterType
 /**
 This class implements a generic biquad filter. Should be inherited by all filters.
 */
-class BiQuad : AudioEffect
+class BiQuad(T) : AudioEffect!T
 {
     public:
 
@@ -32,13 +32,13 @@ class BiQuad : AudioEffect
 
         }
 
-        void initialize(float a0,
-                        float a1,
-                        float a2,
-                        float b1,
-                        float b2,
-                        float c0 = 1,
-                        float d0 = 0)  nothrow @nogc
+        void initialize(T a0,
+                        T a1,
+                        T a2,
+                        T b1,
+                        T b2,
+                        T c0 = 1,
+                        T d0 = 0)  nothrow @nogc
         {
            _a0 = a0;
            _a1 = a1;
@@ -65,9 +65,9 @@ class BiQuad : AudioEffect
             reset();
         }
 
-        override float getNextSample(const float input)  nothrow @nogc
+        override T getNextSample(const T input)  nothrow @nogc
         {
-            float output = (_a0 * input + _a1 * _xn1 + _a2 * _xn2 - _b1 * _yn1 - _b2 * _yn2) * _c0 + (input * _d0);
+            T output = (_a0 * input + _a1 * _xn1 + _a2 * _xn2 - _b1 * _yn1 - _b2 * _yn2) * _c0 + (input * _d0);
 
             _xn2 = _xn1;
             _xn1 = input;
@@ -90,13 +90,13 @@ class BiQuad : AudioEffect
     protected:
 
         //Delay samples
-        float _xn1=0, _xn2=0;
-        float _yn1=0, _yn2=0;
+        T _xn1=0, _xn2=0;
+        T _yn1=0, _yn2=0;
 
         //Biquad Coeffecients
-        float _a0=0, _a1=0, _a2=0;
-        float _b1=0, _b2=0;
-        float _c0=1, _d0=0;
+        T _a0=0, _a1=0, _a2=0;
+        T _b1=0, _b2=0;
+        T _c0=1, _d0=0;
 
         float _sampleRate;
         float _qFactor;

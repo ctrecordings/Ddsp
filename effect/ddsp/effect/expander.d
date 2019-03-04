@@ -14,13 +14,13 @@ import std.algorithm;
 import std.math;
 
 /// Basic Expander
-class Expander : DynamicsProcessor
+class Expander(T) : DynamicsProcessor!T
 {
 public:
 nothrow:
 @nogc:
     
-    override float getNextSample(const float input)
+    override T getNextSample(const T input)
     {
         detector.detect(input);
         float detectorValue = floatToDecibel(detector.getEnvelope());
@@ -60,7 +60,7 @@ private:
     }
 }
 
-class Gate : Expander
+class Gate(T) : Expander!T
 {
 public:
 nothrow:

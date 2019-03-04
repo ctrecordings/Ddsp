@@ -18,13 +18,13 @@ import std.algorithm : clamp;
 /// Accepts a floating point value and returns its decibel equivalent.
 /// `value` should be in the range of -1 to 1 and returns a float in the
 /// range -96 to 0
-float floatToDecibel(float value) nothrow @nogc
+T floatToDecibel(T = float)(T value) nothrow @nogc
 {
     return 20 * log(value); 
 }
 
 /// Accepts a decibel value and returns its floating point equivalent.
-float decibelToFloat(float value) nothrow @nogc
+T decibelToFloat(T = float)(T value) nothrow @nogc
 {
     return pow(10, value/20);
 }
@@ -32,14 +32,14 @@ float decibelToFloat(float value) nothrow @nogc
 /// Accepts a time in milliseconds and the sample rate
 /// Returns the amount of samples that corresponds to the
 /// time in milliseconds.
-float msToSamples(float ms, float sampleRate) nothrow @nogc
+T msToSamples(T = float)(T ms, T sampleRate) nothrow @nogc
 {
     return ms * (sampleRate / 1000);
 }
 
 /// Accepts a number of samples and the sample rate.
 /// Returns the corresponding time in milliseconds.
-float samplesToMs(float samples, float sampleRate) nothrow @nogc
+T samplesToMs(T = float)(T samples, T sampleRate) nothrow @nogc
 {
     return samples / (1000 / sampleRate);
 }
@@ -52,12 +52,12 @@ float samplesToMs(float samples, float sampleRate) nothrow @nogc
 ///         input = the x coordinate whose corresponding y value will be found
 /// Returns a y value along the curve that touches each (x,y) pair from arrX
 /// and arrY.    The pair (input, sum) is a point on that curve.
-float lagrpol(float[] arrX, float [] arrY, int order, float input) nothrow @nogc
+T lagrpol(T = float)(T[] arrX, T[] arrY, int order, T input) nothrow @nogc
 {
-    float sum = 0;
+    T sum = 0;
     for(int i = 0; i < order; ++i)
     {
-        float Lg = 1.0f;
+        T Lg = 1.0f;
         for(int j = 0; j < order; ++j)
         {
             if (i != j)
@@ -75,13 +75,13 @@ float lagrpol(float[] arrX, float [] arrY, int order, float input) nothrow @nogc
 /// Returns the corresopnding y value for x
 /// such that (x,y) is a point on the line
 /// that intersects (x1,y1) and (x2,y2)
-float linearInterp(float x1, float x2, float y1, float y2, float x) nothrow @nogc
+T linearInterp(T = float)(T x1, T x2, T y1, T y2, T x) nothrow @nogc
 {
     return (x - x1) * (y2 - y1) / (x2 - x1) + y1;
 }
 
 /// sinc(x) aka the sampling function.
-float sinc(float x)
+T sinc(T = float)(T x)
 {
     if(x == 0)
         return 1;

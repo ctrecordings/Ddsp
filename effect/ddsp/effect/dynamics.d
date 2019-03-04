@@ -16,7 +16,7 @@ import std.math;
 
 /// Base class for dynamics processors such as compressor, limiter, expander, and gate.
 /// This class is useless on it's own.  It should be inherited from and have getNextSample overriden.
-class DynamicsProcessor : AudioEffect
+class DynamicsProcessor(T) : AudioEffect!T
 {
 public:
 nothrow:
@@ -43,7 +43,7 @@ nothrow:
         _kneeWidth = knee;
     }
     
-    override float getNextSample(const float input)
+    override T getNextSample(const T input)
     {
         return 0;
     }
