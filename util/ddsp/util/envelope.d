@@ -7,13 +7,15 @@ module ddsp.util.envelope;
 
 import std.math;
 import std.algorithm;
+import ddsp.util.buffer;
+import dplug.core.nogc;
 
 /// Envelop Detector with adjustable attack and release times. Great for compressors
 /// and meters.
 /+
 http://www.musicdsp.org/showArchiveComment.php?ArchiveID=97
 +/
-class EnvelopeDetector
+class EnvelopeDetector(T)
 {
 public:
 nothrow:
@@ -35,21 +37,23 @@ nothrow:
         _gr = exp(-1 / (_sampleRate * releaseTime / 1000));
     }
     
-    void detect(float input)
+    T detect(T input)
     {
-        float envIn = abs(input);
+        T envIn = processInput(input);
         
         if(_envelope < envIn)
             _envelope = _envelope * _ga + (1 - _ga) * envIn;
         else
             _envelope = _envelope * _gr + (1 - _gr) * envIn;
-        
+        return _envelope;
     }
     
-    float getEnvelope()
+    T getEnvelope()
     {
         return _envelope;
     }
+
+    abstract T processInput(T input);
     
 private:
     /// Attack coefficient
@@ -69,7 +73,7 @@ private:
 /+
 http://www.musicdsp.org/archive.php?classid=2#19
 +/
-class PeakFollower
+class PeakDetector(T): EnvelopeDetector!T
 {
 public:
 nothrow:
@@ -77,34 +81,12 @@ nothrow:
 
     this()
     {
-        _envelope = 0f;
+        super();
     }
-    
-    void setSampleRate(const float sampleRate)
+
+    override T processInput(T input)
     {
-        _sampleRate = sampleRate;
-    }
-    
-    void initialize(const float decayTime)
-    {
-        _decay = pow(0.5, 1.0 / (decayTime * _sampleRate));
-    }
-    
-    void detect(const float input)
-    {
-        float absInput = abs(input);
-        
-        if(absInput >= _envelope)
-            _envelope = absInput;
-        else
-        {
-            _envelope = clamp(_envelope * _decay, 0.0f, 1.0f);
-        }
-    }
-    
-    float getEnvelope()
-    {
-        return _envelope;
+        return abs(input);
     }
     
 private:
@@ -115,38 +97,71 @@ private:
     float _sampleRate;
 }
 
-/+class SimpleRMS
+class RMSDetector(T): EnvelopeDetector!T
 {
-public:
-nothrow:
-@nogc:
+    public:
+    nothrow:
+    @nogc:
 
-    this()
+        this(int windowSize)
+        {
+            super();
+            _windowSize = windowSize;
+            _buffer = mallocNew!(Buffer!T)(_windowSize);
+            _counter = 0;
+            runningMean = 0;
+        }
+
+        override T processInput(T input)
+        {
+            immutable T poppedVal = _buffer.read();
+
+            if(_counter < _windowSize)
+            {
+                ++_counter;
+            }
+            else
+            {
+                runningMean -= (poppedVal * poppedVal) / _windowSize;
+            }
+            runningMean += (input * input) / _windowSize;
+            _buffer.write(input);
+            return sqrt(runningMean);
+        }
+
+    private:
+        int _windowSize;
+        int _counter;
+        Buffer!T _buffer;
+        T runningMean;
+}
+
+unittest
+{
+    import std.stdio;
+    float[] values = [0, 0, 1, 1, 0, 1, 0, 1, 1, 1];
+
+    auto rmsDetector = new RMSDetector!float(10);
+    rmsDetector.setSampleRate(44100);
+    rmsDetector.setEnvelope(0, 0);
+    for(int i = 0; i < 10; ++i)
     {
-        _envelope = 0.0f;
+        foreach(val; values)
+        {
+            auto result = rmsDetector.detect(val);
+            writeln(result);
+        }
     }
-    
-    void setSampleRate(float sampleRate)
+
+    auto peakDetector = new PeakDetector!float();
+    peakDetector.setSampleRate(44100);
+    peakDetector.setEnvelope(0.1, 1);
+    for(int i = 0; i < 10; ++i)
     {
-        _sampleRate = sampleRate;
+        foreach(val; values)
+        {
+            auto result = peakDetector.detect(val);
+            writeln(result);
+        }
     }
-    
-    void initialize(uint windowSize)
-    {
-        _windowSize = windowSize;
-        buffer = cast(T*) malloc(windowSize * T.sizeof);
-    }
-    
-    void detect(float input)
-    {
-        
-    }
-    
-    float getEnvelope()
-    {
-        return _envelope;
-    }
-    
-private:
-    float[] buffer;
-}+/
+}

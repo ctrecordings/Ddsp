@@ -23,16 +23,16 @@ nothrow:
 @nogc:
 
     /// Tracks the input level to trigger compression.
-    EnvelopeDetector detector;
+    PeakDetector!float detector;
     
     /// Will point to the detector of a processor that is stereo linked
-    EnvelopeDetector *linkedDetector;
+    PeakDetector!float *linkedDetector;
 
     this()
     {
         x = mallocSlice!float(2);
         y = mallocSlice!float(2);
-        detector = mallocNew!EnvelopeDetector;
+        detector = mallocNew!(PeakDetector!float)();
     }
     
     void setParams(float attackTime, float releaseTime, float threshold, float ratio, float knee)
