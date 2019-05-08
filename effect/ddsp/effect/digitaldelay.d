@@ -28,7 +28,7 @@ public:
         _mix = 0.0f;
         _useExternalFeedback = false;
         
-        _readIndex = 0;
+        _readIndex = 1;
         _writeIndex = 0;
         
         feedbackFX = makeVec!(AudioEffect!T);
