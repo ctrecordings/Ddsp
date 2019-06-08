@@ -9,6 +9,7 @@ import std.math;
 import std.algorithm;
 import ddsp.util.buffer;
 import dplug.core.nogc;
+import dplug.core.ringbuf;
 
 /// Envelop Detector with adjustable attack and release times. Great for compressors
 /// and meters.
@@ -89,9 +90,7 @@ nothrow:
         return abs(input);
     }
     
-private:
-    float _envelope;
-    
+private:    
     float _decay;
     
     float _sampleRate;
@@ -164,4 +163,47 @@ unittest
             writeln(result);
         }
     }
+}
+
+/**
+ * This class is used for calculating a moving average.  It's useful for things such
+ * as smoothing meter values.
+ */
+class MovingAverage(T)
+{
+public:
+nothrow:
+@nogc:
+
+    this(int windowSize)
+    {
+        _windowSize = windowSize;
+        _buffer = makeRingBufferNoGC!T(_windowSize);
+		_avg = 0;
+    }
+
+    T process(double sample)
+    {
+        T prevSample = _buffer.isFull() ? _buffer.popFront() : 0;
+        _avg -= prevSample / _windowSize;
+        _avg += sample / _windowSize;
+        _buffer.pushBack(sample);
+        return _avg;
+    }
+
+    T getAverage()
+    {
+        return _avg;
+    }
+
+private:
+    RingBufferNoGC!T _buffer;
+    int _windowSize;
+    T _avg;
+
+}
+
+unittest
+{
+    auto movingAverage = mallocNew!(MovingAverage!float)(100);
 }
