@@ -20,7 +20,7 @@ import std.algorithm : clamp;
 /// range -96 to 0
 T floatToDecibel(T = float)(T value) nothrow @nogc
 {
-    return 20 * log(value); 
+    return 20 * log10(value); 
 }
 
 /// Accepts a decibel value and returns its floating point equivalent.
