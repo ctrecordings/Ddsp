@@ -30,6 +30,11 @@ private:
 
 }
 
+unittest
+{
+    LowpassO1!float lowpassQ1 = new LowpassO1!float();
+}
+
 /// Second order lowpass filter
 class LowpassO2(T) : BiQuad!T
 {
@@ -63,6 +68,11 @@ private:
     float _gamma;
 }
 
+unittest
+{
+    LowpassO2!float lowpassQ2 = new LowpassO2!float();
+}
+
 /// Second order butterworth lowpass filter
 class ButterworthLP(T) : BiQuad!T
 {
@@ -78,6 +88,11 @@ public:
     }
 private:
     float _C;
+}
+
+unittest
+{
+    ButterworthLP!float butterworthLP = new ButterworthLP!float();
 }
 
 //Second order linkwitz-riley lowpass filter
@@ -110,4 +125,9 @@ private:
     float _omega;
     float _kappa;
     float _delta;
+}
+
+unittest
+{
+    LinkwitzRileyLP!float linkwitzRileyLP = new LinkwitzRileyLP!float();
 }

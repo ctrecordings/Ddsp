@@ -70,6 +70,11 @@ private:
     float _sampleRate;
 }
 
+unittest
+{
+    EnvelopeDetector!float envelopeDetector = new EnvelopeDetector!float();
+}
+
 /// Simple Peak envelope follower, useful for meters.
 /+
 http://www.musicdsp.org/archive.php?classid=2#19
@@ -94,6 +99,11 @@ private:
     float _decay;
     
     float _sampleRate;
+}
+
+unittest
+{
+    PeakDetector!float peakDetector = new PeakDetector!float();
 }
 
 class RMSDetector(T): EnvelopeDetector!T
