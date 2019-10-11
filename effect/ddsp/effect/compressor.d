@@ -71,6 +71,11 @@ private:
     }
 }
 
+unittest
+{
+    Compressor!float compressor = new Compressor!float();
+}
+
 /// Basic look-ahead limiter that is based on the compressor from before.
 class Limiter(T) : Compressor!T
 {
@@ -112,4 +117,9 @@ private:
     
     /// Current amount of lookahead being used in samples.
     float _lookAheadAmount;
+}
+
+unittest
+{
+    Limiter!float limiter = new Limiter!float();
 }

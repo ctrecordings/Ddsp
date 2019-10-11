@@ -31,6 +31,11 @@ private:
     float _gamma;
 }
 
+unittest
+{
+    HighpassO1!float hpq1 = new HighpassO1!float();
+}
+
 /// Second order highpass filter
 class HighpassO2(T) : BiQuad!T
 {
@@ -64,6 +69,11 @@ private:
     float _gamma;
 }
 
+unittest
+{
+    HighpassO2!float hpq2 = new HighpassO2!float();
+}
+
 /// Second order butterworth highpass filter
 class ButterworthHP(T) : BiQuad!T
 {
@@ -84,6 +94,11 @@ public:
 
 private:
     float _C;
+}
+
+unittest
+{
+    ButterworthHP!float butterworthHP = new ButterworthHP!float();
 }
 
 /// Second order LinkwitzRiley highpass filter
@@ -117,4 +132,9 @@ private:
     float _omega;
     float _kappa;
     float _delta;
+}
+
+unittest
+{
+    LinkwitzRileyHP!float linkwitzRileyHP = new LinkwitzRileyHP!float();
 }

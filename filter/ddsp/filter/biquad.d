@@ -102,13 +102,3 @@ class BiQuad(T) : AudioEffect!T
         float _qFactor;
         float _frequency;
 }
-
-unittest
-{
-    import dplug.core.nogc;
-
-    //BiQuad f = mallocNew!BiQuad();
-    //f.setSampleRate(44100);
-    //f.initialize(0.1, 0.3, 0.5, 0,5, 0.1);
-    //testEffect(f, "BiQuad", 44100 * 2, false);
-}

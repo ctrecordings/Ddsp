@@ -96,3 +96,8 @@ private:
             _buffer[element] = cast(T) 0;
     }
 }
+
+unittest
+{
+    Buffer!float buffer = new Buffer!float(1000);
+}

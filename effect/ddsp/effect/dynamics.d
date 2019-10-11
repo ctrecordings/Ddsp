@@ -98,3 +98,8 @@ protected:
 
     //DynamicsProcessor _linkedProcessor;
 }
+
+unittest
+{
+    DynamicsProcessor!float dynamicsProcessor = new DynamicsProcessor!float();
+}
