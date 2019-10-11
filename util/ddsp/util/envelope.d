@@ -70,11 +70,6 @@ private:
     float _sampleRate;
 }
 
-unittest
-{
-    EnvelopeDetector!float envelopeDetector = new EnvelopeDetector!float();
-}
-
 /// Simple Peak envelope follower, useful for meters.
 /+
 http://www.musicdsp.org/archive.php?classid=2#19
