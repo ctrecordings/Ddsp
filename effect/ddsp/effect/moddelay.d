@@ -22,8 +22,8 @@ nothrow:
 
     this()
     {
-        lfo = calloc!WTOscillator.init();
-        delay = calloc!DigitalDelay.init();
+        lfo = calloc!(WTOscillator!T).init();
+        delay = calloc!(DigitalDelay!T).init();
     }
 
     override void setSampleRate(float sampleRate)
@@ -89,8 +89,13 @@ private:
     float _max_delay;
     float _min_delay;
 
-    WTOscillator lfo;
-    DigitalDelay delay;
+    WTOscillator!T lfo;
+    DigitalDelay!T delay;
+}
+
+unittest 
+{
+    ModDelay!float modDelay = new ModDelay!float();
 }
 
 class Flanger(T) : AudioEffect!T
@@ -101,7 +106,7 @@ nothrow:
 
     this()
     {
-        _modDelay = calloc!ModDelay.init();
+        _modDelay = calloc!(ModDelay!T).init();
     }
 
 	override void setSampleRate(float sampleRate)
@@ -127,7 +132,12 @@ nothrow:
     }
 
 private:
-    ModDelay _modDelay;
+    ModDelay!T _modDelay;
+}
+
+unittest
+{
+    Flanger!float flanger = new Flanger!float();
 }
 
 class Vibrato(T) : AudioEffect!T
@@ -138,7 +148,7 @@ nothrow:
 
     this()
     {
-        _modDelay = calloc!ModDelay.init();
+        _modDelay = calloc!(ModDelay!T).init();
     }
 
 	override void setSampleRate(float sampleRate)
@@ -164,7 +174,12 @@ nothrow:
     }
 
 private:
-    ModDelay _modDelay;
+    ModDelay!T _modDelay;
+}
+
+unittest
+{
+    Vibrato!float vibrato = new Vibrato!float();
 }
 
 class Chorus(T) : AudioEffect!T
@@ -175,7 +190,7 @@ nothrow:
 
     this()
     {
-        _modDelay = calloc!ModDelay.init();
+        _modDelay = calloc!(ModDelay!T).init();
     }
 
 	override void setSampleRate(float sampleRate)
@@ -201,5 +216,10 @@ nothrow:
     }
 
 private:
-    ModDelay _modDelay;
+    ModDelay!T _modDelay;
+}
+
+unittest
+{
+    Chorus!float chorus = new Chorus!float();
 }
