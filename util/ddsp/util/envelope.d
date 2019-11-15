@@ -54,6 +54,11 @@ nothrow:
         return _envelope;
     }
 
+    void reset()
+    {
+        _envelope = 0;
+    }
+
     abstract T processInput(T input);
     
 private:
