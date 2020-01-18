@@ -204,9 +204,9 @@ nothrow:
         if(sampleRate != _sampleRate)
         {
             _sampleRate = sampleRate;
-            foreach(lpf; _secondOrderLowpasses)
+            foreach(index; 0.._secondOrderLowpasses.length)
             {
-                lpf.setSampleRate(sampleRate);
+                _secondOrderLowpasses[index].setSampleRate(sampleRate);
             }
         }
     }
@@ -222,12 +222,18 @@ unittest
 {
     import std.stdio;
     writeln("****************************");
-    writeln("* Butterworth Filter tests    *");
+    writeln("* Butterworth Filter tests *");
     writeln("****************************");
+
+    writeln("Q Value Calculations");
+    float[] actual = calculateQValuesForButterworth(4);
+    float[] expected = [0.541196100146197, 1.3065629648763764];
+    assert( actual ==  expected, "Failed for order = 4");
+    writeln("passed for order = 4");
 
     ButterworthLPNthOrder!float butterworth4 = mallocNew!(ButterworthLPNthOrder!float)(4);
     butterworth4.setSampleRate(44100.0f);
-    butterworth4.setFrequency(1000);
+    butterworth4.setFrequency(10);
 
     float[] impulse = [1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f];
     float[] lpfOutput = [];
@@ -236,6 +242,7 @@ unittest
         lpfOutput ~= butterworth4.getNextSample(sample);
     }
 
-    writeln("Lowpass Output:");
+    writeln("Butterworth N=4 Output:");
     writeln(lpfOutput);
+    
 }
