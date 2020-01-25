@@ -27,80 +27,35 @@ module ddsp.filter.allpass;
 
 import std.math;
 
-import ddsp.effect.effect;
-
-const float pi = 3.14159265;
+import ddsp.filter.biquad;
 
 
 /// Allpass filter for introducting a 180 degrees phase shift at the center
 /// frequency.  This is necessary for summing more than 2 bands created from
 /// Linkwitz-Riley filters.
-/// TODO: Inherit BiQuad directly to remove redundent code.
-class Allpass(T) : AudioEffect!T
+class Allpass(T) : BiQuad!T
 {
 public:
 
     this() nothrow @nogc
     {
-
+        super();
     }
 
-    void initialize(float frequency, float q = 0.707) nothrow @nogc
+    override void calcCoefficients()
     {
-        _frequency = frequency;
-        float _w0 = 2 * pi * _frequency / _sampleRate;
-        float cs = cos(_w0);
-        float sn = sin(_w0);
-        float AL = sn / (2 * q);
+        immutable float _w0 = 2 * PI * _frequency / _sampleRate;
+        immutable float cs = cos(_w0);
+        immutable float sn = sin(_w0);
+        immutable float AL = sn / (2 * 0.707f);
 
-        _a0 = 1 + AL;
-        _a1 = (-2 * cs) / _a0;
-        _a2 = (1 - AL) / _a0;
-        _b0 = (1 - AL) / _a0;
-        _b1 = (-2 * cs) / _a0;
-        _b2 = (1 + AL) / _a0;
+        immutable float _b0 = 1 + AL;
+        _b1 = (-2 * cs) / _b0;
+        _b2 = (1 - AL) / _b0;
+        _a0 = (1 - AL) / _b0;
+        _a1 = (-2 * cs) / _b0;
+        _a2 = (1 + AL) / _b0;
     }
-
-    override T getNextSample(const T input)  nothrow @nogc
-    {
-        _w = input - _a1 * _w1 - _a2 * _w2;
-        _yn = _b0 * _w + _b1 *_w1 + _b2 * _w2;
-
-        _w2 = _w1;
-        _w1 = _w;
-
-        return _yn;
-    }
-
-    override void reset() nothrow @nogc
-    {
-        _w = 0;
-        _w1 = 0;
-        _w2 = 0;
-
-        _yn = 0;
-    }
-
-    void setFrequency(float frequency) nothrow @nogc
-    {
-        initialize(frequency);
-    }
-
-private:
-    float _a0 = 0;
-    float _a1 = 0;
-    float _a2 = 0;
-    float _b0 = 0;
-    float _b1 = 0;
-    float _b2 = 0;
-
-    float _w = 0;
-    float _w1 = 0;
-    float _w2 = 0;
-
-    float _yn;
-
-    float _frequency;
 }
 
 unittest
