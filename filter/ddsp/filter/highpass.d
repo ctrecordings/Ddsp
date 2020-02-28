@@ -127,6 +127,13 @@ nothrow:
         _b1 = (-2 * _kappa * _kappa + 2 * _omega * _omega) / _delta;
         _b2 = (-2 * _kappa * _omega + _kappa * _kappa + _omega * _omega) / _delta;
     }
+
+    // Useful in determining if setSampleRate and setFrequency need to be called
+    // Uses short circuiting to squeeze a little more efficiency out of check
+    bool isInitialized()
+    {
+        return !(isNaN(_theta) || isNaN(_omega) || isNaN(_kappa) || isNaN(_delta));
+    }
 private:
     float _theta;
     float _omega;
