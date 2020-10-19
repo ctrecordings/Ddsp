@@ -28,12 +28,52 @@ module ddsp.filter.allpass;
 import std.math;
 
 import ddsp.filter.biquad;
+import ddsp.effect : AudioEffect;
+
+import dplug.core : Vec, mallocNew, makeVec;
+
+/// 1st order Allpass filter for introducting a 90 degrees phase shift at the center
+/// frequency.
+class AllpassO1(T) : BiQuad!T
+{
+public:
+
+    this() nothrow @nogc
+    {
+        super();
+    }
+
+    override void calcCoefficients()
+    {
+        _alpha = (tan(pi * _frequency / _sampleRate) - 1) / (tan(pi * _frequency / _sampleRate) + 1);
+        
+        _a0 = _alpha;
+        _a1 = 1.0;
+        _a2 = 0.0;
+        _b1 = _alpha;
+        _b2 = 0.0;
+    }
+
+private:
+    float _alpha;
+}
+
+unittest
+{
+    import dplug.core.nogc;
+    import ddsp.effect : testEffect;
+    
+    AllpassO1!float f = mallocNew!(AllpassO1!float)();
+    f.setSampleRate(44100);
+    f.setFrequency(10000);
+    testEffect(f, "AllpassO1", 44100 * 2, false);
+}
 
 
-/// Allpass filter for introducting a 180 degrees phase shift at the center
-/// frequency.  This is necessary for summing more than 2 bands created from
+/// 2nd order Allpass filter for introducting a 180 degrees phase shift at the center
+/// frequency.  This is necessary for summing more than 2 bands created from 2nd order
 /// Linkwitz-Riley filters.
-class Allpass(T) : BiQuad!T
+class AllpassO2(T) : BiQuad!T
 {
 public:
 
@@ -58,13 +98,115 @@ public:
     }
 }
 
+/// Deprecated: use `AllpassO2` instead.
+/// This is just an alias to `AllpassO2` since `Allpass` was renamed
+/// to `AllpassO2`
+alias Allpass = AllpassO2;
+
 unittest
 {
     import dplug.core.nogc;
     import ddsp.effect : testEffect;
     
-    Allpass!float f = mallocNew!(Allpass!float)();
+    AllpassO2!float f = mallocNew!(AllpassO2!float)();
     f.setSampleRate(44100);
     f.setFrequency(10000);
-    testEffect(f, "Allpass", 44100 * 2, false);
+    testEffect(f, "AllpassO2", 44100 * 2, false);
+}
+
+/// Nth order Allpass filter created using 2nd and 1st order Allpass filters
+/// Useful to correct phase on crossovers created using nth order Linkwitz-Riley
+/// filters.
+class AllpassNthOrder(T) : AudioEffect!T
+{
+public:
+nothrow:
+@nogc:
+    this(int order)
+    {
+        _order = order;
+
+        // if odd order then we need one 1st order component
+        if(_order % 2 != 0)
+        {
+            _1stOrderFilter = mallocNew!(AllpassO1!T)();
+        }
+
+        foreach(i; 0..(_order / 2))
+        {
+            _2ndOrderFilters.pushBack(mallocNew!(AllpassO2!T)());
+        }
+    }
+
+    void setFrequency(float frequency)
+    {
+        if(_freqency != frequency)
+        {
+            _freqency = frequency;
+
+            if(_1stOrderFilter)
+            {
+                _1stOrderFilter.setFrequency(_freqency);
+            }
+
+            foreach(i; 0..(_order / 2))
+            {
+                _2ndOrderFilters[i].setFrequency(_freqency);
+            }
+        }
+    }
+
+    override void setSampleRate(float sampleRate)
+    {
+        if(_sampleRate != sampleRate)
+        {
+            _sampleRate = sampleRate;
+
+            if(_1stOrderFilter)
+            {
+                _1stOrderFilter.setSampleRate(_sampleRate);
+            }
+
+            foreach(i; 0..(_order / 2))
+            {
+                _2ndOrderFilters[i].setSampleRate(_sampleRate);
+            }
+        }
+    }
+
+    override float getNextSample(const(float) input)
+    {
+        float output = input;
+        if(_1stOrderFilter)
+        {
+            output = _1stOrderFilter.getNextSample(output);
+        }
+
+        foreach(i; 0..(_order / 2))
+        {
+            output = _2ndOrderFilters[i].getNextSample(output);
+        }
+
+        return output;
+    }
+
+    override void reset()
+    {
+        if(_1stOrderFilter)
+        {
+            _1stOrderFilter.reset();
+        }
+
+        foreach(i; 0..(_order / 2))
+        {
+            _2ndOrderFilters[i].reset();
+        }
+    }
+
+private:
+    Vec!(AllpassO2!T) _2ndOrderFilters;
+    AllpassO1!T _1stOrderFilter;
+
+    int _order;
+    float _freqency;
 }

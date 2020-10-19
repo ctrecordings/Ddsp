@@ -158,7 +158,7 @@ unittest
         foreach(val; values)
         {
             auto result = rmsDetector.detect(val);
-            writeln(result);
+            // writeln(result);
         }
     }
 
@@ -170,7 +170,7 @@ unittest
         foreach(val; values)
         {
             auto result = peakDetector.detect(val);
-            writeln(result);
+            // writeln(result);
         }
     }
 }
