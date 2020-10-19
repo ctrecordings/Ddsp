@@ -61,6 +61,7 @@ public:
 unittest
 {
     import dplug.core.nogc;
+    import ddsp.effect : testEffect;
     
     Allpass!float f = mallocNew!(Allpass!float)();
     f.setSampleRate(44100);

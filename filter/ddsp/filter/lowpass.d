@@ -143,6 +143,64 @@ unittest
     LinkwitzRileyLP!float linkwitzRileyLP = new LinkwitzRileyLP!float();
 }
 
+
+class LinkwitzRileyLPNthOrder(T) : AudioEffect!T
+{
+public:
+nothrow:
+@nogc:
+
+    this(int order)
+    {
+        assert(order % 2 == 0, "LR filter order must be even");
+        _order = order;
+
+        _bw1 = mallocNew!(ButterworthLPNthOrder!T)(order / 2);
+        _bw2 = mallocNew!(ButterworthLPNthOrder!T)(order / 2);
+    }
+
+    void setFrequency(float frequency)
+    {
+        _frequency = frequency;
+        _bw1.setFrequency(_frequency);
+        _bw2.setFrequency(_frequency);
+    }
+
+    override float getNextSample(const(float) input)
+    {
+        return _bw2.getNextSample(_bw1.getNextSample(input));
+    }
+
+    override void reset()
+    {
+        _bw1.reset();
+        _bw2.reset();
+    }
+
+    override void setSampleRate(float sampleRate)
+    {
+        _sampleRate = sampleRate;
+        _bw1.setSampleRate(_sampleRate);
+        _bw2.setSampleRate(_sampleRate);
+    }
+
+private:
+    ButterworthLPNthOrder!T _bw1;
+    ButterworthLPNthOrder!T _bw2;
+
+    int _order;
+    float _frequency;
+}
+
+unittest
+{
+    LinkwitzRileyLPNthOrder!float lr8thOrder = mallocNew!(LinkwitzRileyLPNthOrder!float)(8);
+    lr8thOrder.setSampleRate(44100);
+    lr8thOrder.setFrequency(400);
+    
+}
+
+
 float[] calculateQValuesForButterworth(int filterOrder) nothrow @nogc
 {
     float[] qValues = mallocSlice!float(filterOrder / 2);
