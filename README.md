@@ -1,4 +1,4 @@
-# Ddsp [![Build Status](https://travis-ci.org/ctrecordings/Ddsp.svg?branch=master)](https://travis-ci.org/ctrecordings/Ddsp) [![Dub version](https://img.shields.io/dub/v/ddsp.svg)](https://code.dlang.org/packages/ddsp) 
+# Ddsp [![Build Status](https://travis-ci.org/ctrecordings/Ddsp.svg?branch=master)](https://travis-ci.org/ctrecordings/Ddsp) [![Build Status](https://cutthroughrecordings.visualstudio.com/Ddsp/_apis/build/status/ctrecordings.Ddsp?branchName=master)](https://cutthroughrecordings.visualstudio.com/Ddsp/_build/latest?definitionId=2&branchName=master) [![Dub version](https://img.shields.io/dub/v/ddsp.svg)](https://code.dlang.org/packages/ddsp) 
 A high level library for Digital Signal Processing in D with a focus on audio.
 
 I am not an expert on DSP by any means.  Most of the designs for these plugins are ones that I have found and compiled from various books and websites.
