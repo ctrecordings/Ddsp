@@ -55,6 +55,6 @@
         }
     ],
     "dependencies": {
-        "dplug:core": "~>9.0"
+        "dplug:core": "~>10.0"
     }
 }
