@@ -1,0 +1,44 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- '*'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+- job: Linux
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - checkout: self
+      fetchDepth: 1
+      
+    # Install libx11-dev package, ldc, dub, dplug-build
+    - script: |
+        # exit as soon as any line in the bash script fails
+        set -ex
+
+        # There is no permissions in default directory for system changes, so make sure to cd ..
+        cd ..
+        
+        # Install libs
+        sudo apt-get -yq install libx11-dev
+        
+        # Install compiler
+        curl -fsS https://dlang.org/install.sh | bash -s ldc-1.17.0 -a
+        ~/dlang/install.sh list
+        source ~/dlang/ldc-1.17.0/activate
+        ldc2 --version
+        dub --version
+
+      displayName: Install
+      
+    - script: |
+        source ~/dlang/ldc-1.17.0/activate
+        dub test
+      displayName: Build and Run unit tests
+
