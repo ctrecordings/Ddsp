@@ -24,18 +24,27 @@ nothrow:
 
     this()
     {
-        _envelope = 0f;    
+        _envelope = 0f;
+        setTimeConstant(0.01);
     }
     
     void setSampleRate(const float sampleRate)
     {
         _sampleRate = sampleRate;
     }
+
+
+    void setTimeConstant(const float timeConstant) {
+        _timeConstant = log10(timeConstant);
+    }
     
+    /**
+     * Set the attack and release times of the envelope detector in milliseconds
+     */
     void setEnvelope(const float attackTime, const float releaseTime)
     {
-        _ga = exp(-1/(_sampleRate * attackTime / 1000));
-        _gr = exp(-1 / (_sampleRate * releaseTime / 1000));
+        _ga = exp( _timeConstant /(_sampleRate * attackTime * 0.001));
+        _gr = exp( _timeConstant / (_sampleRate * releaseTime * 0.001));
     }
     
     T detect(T input)
@@ -73,6 +82,9 @@ private:
     
     /// Sample Rate
     float _sampleRate;
+
+    /// time constant used to calculate attack and release times
+    float _timeConstant;
 }
 
 /// Simple Peak envelope follower, useful for meters.
