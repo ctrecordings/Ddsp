@@ -55,6 +55,10 @@ nothrow:
             _envelope = _envelope * _ga + (1 - _ga) * envIn;
         else
             _envelope = _envelope * _gr + (1 - _gr) * envIn;
+
+        if(isNaN(_envelope)) {
+            _envelope = 0.0f;
+        }
         return _envelope;
     }
     
