@@ -23,7 +23,7 @@ nothrow:
     
     override T getNextSample(const T input)
     {
-        detector.detect(input * 4);
+        detector.detect(input);
 
         float detectorValue;
         if(linkedDetector !is null)
@@ -43,6 +43,7 @@ private:
     /// If set to true, ratio will become infinite and result in limiting
     bool _limit;
     
+protected:
     /// This is the function that does most of the work with calculating compression
     float calcCompressorGain(float detectorValue, float threshold, float ratio, float kneeWidth)
     {
