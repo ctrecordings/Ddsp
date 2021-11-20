@@ -41,7 +41,7 @@ T msToSamples(T = float)(T ms, T sampleRate) nothrow @nogc
 /// Returns the corresponding time in milliseconds.
 T samplesToMs(T = float)(T samples, T sampleRate) nothrow @nogc
 {
-    return samples / (1000 / sampleRate);
+    return samples / (sampleRate / 1000);
 }
 
 /// Lagrange Interpolation
