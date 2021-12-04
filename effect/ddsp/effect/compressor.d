@@ -38,7 +38,7 @@ nothrow:
         return input * calcCompressorGain(detectorValue, _threshold, _ratio, _kneeWidth);
     }
     
-private:
+protected:
 
     /// If set to true, ratio will become infinite and result in limiting
     bool _limit;
