@@ -14,42 +14,45 @@ import dplug.core.nogc;
 abstract class AudioEffect(T)
 {
 public:
-    
-    /**
+
+  /**
     * Process a sample that is passed to the processor, and return the next sample.
     */
-    abstract T getNextSample(const T input) nothrow @nogc;
-    
-    /**
+  abstract T getNextSample(const T input) nothrow @nogc;
+
+  /**
      * Takes a set of buffers and processes them with getNextSample()
      * In the future this could possibly be optimized
      */
-    void processBuffers(const (T)* inputBuffer, T* outputBuffer, int numSamples)
+  void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
+  {
+    foreach (sample; 0 .. numSamples)
     {
-        foreach(sample; 0..numSamples)
-        {
-            outputBuffer[sample] = getNextSample(inputBuffer[sample]);
-        }
+      outputBuffer[sample] = getNextSample(inputBuffer[sample]);
     }
-    
-    /**
+  }
+
+  /**
     * Should be used to free any delay elements or do any setup before play begins.
     */
-    abstract void reset() nothrow @nogc;
+  abstract void reset() nothrow @nogc;
 
-    /**
+  /**
     *
     */
-    void setSampleRate(float sampleRate) nothrow @nogc
-    {
-        _sampleRate = sampleRate;
-        reset();
-    }
+  void setSampleRate(float sampleRate) nothrow @nogc
+  {
+    _sampleRate = sampleRate;
+    reset();
+  }
 
-    float SampleRate() @property { return _sampleRate; }
-    
+  float SampleRate() @property
+  {
+    return _sampleRate;
+  }
+
 protected:
-    float _sampleRate;
+  float _sampleRate;
 }
 
 /// Holds a list of AudioEffects.  getNextSample(input)
@@ -58,50 +61,51 @@ class FXChain(T) : AudioEffect!T
 {
 public:
 
-    this()
-    {
-        _fxChain = makeVec!AudioEffect();
-    }
-    
-    /// Adds an effect to the end of the FX Chain
-    void addEffect(AudioEffect effect)
-    {
-        _fxChain.pushBack(effect);
-    }
+  this()
+  {
+    _fxChain = makeVec!AudioEffect();
+  }
 
-    override void setSampleRate(float sampleRate)
-    {
-        foreach(effect; _fxChain)
-        {
-            effect.setSampleRate(sampleRate);
-        }
-    }
+  /// Adds an effect to the end of the FX Chain
+  void addEffect(AudioEffect effect)
+  {
+    _fxChain.pushBack(effect);
+  }
 
-    /// Override from AudioEffect.  Processes the input through each effect
-    /// and passes the result to the next effect.
-    override T getNextSample(const T input) nothrow @nogc
+  override void setSampleRate(float sampleRate)
+  {
+    foreach (effect; _fxChain)
     {
-        float output = input;
-        foreach(AudioEffect e; _fxChain)
-        {
-            output = e.getNextSample(output);
-        }
-        return output;
+      effect.setSampleRate(sampleRate);
     }
+  }
 
-    /// Resets each effect in the chain. To clear buffers
-    /// and recalculate coefficients.
-    override void reset() nothrow @nogc
+  /// Override from AudioEffect.  Processes the input through each effect
+  /// and passes the result to the next effect.
+  override T getNextSample(const T input) nothrow @nogc
+  {
+    float output = input;
+    foreach (AudioEffect e; _fxChain)
     {
-        foreach(AudioEffect e; _fxChain){
-            e.reset();
-        }
+      output = e.getNextSample(output);
     }
+    return output;
+  }
+
+  /// Resets each effect in the chain. To clear buffers
+  /// and recalculate coefficients.
+  override void reset() nothrow @nogc
+  {
+    foreach (AudioEffect e; _fxChain)
+    {
+      e.reset();
+    }
+  }
 
 private:
 
-    /// Vector of audio effects.
-    Vec!AudioEffect _fxChain;
+  /// Vector of audio effects.
+  Vec!AudioEffect _fxChain;
 }
 
 /**
@@ -113,46 +117,48 @@ private:
 */
 void testEffect(AudioEffect!float effect, string name, size_t bufferSize = 20000, bool outputResults = false)
 {
-    import std.stdio;
-    import std.random;
+  import std.stdio;
+  import std.random;
 
-    Random gen;
+  Random gen;
 
-    if(outputResults)
+  if (outputResults)
+  {
+    writefln("Testing %s..", name);
+    writefln("Initial State: %s", effect.toString());
+  }
+
+  float[] outputs;
+  string[] stringResults;
+
+  for (int i = 0; i < bufferSize; ++i)
+  {
+    float sample = uniform(0.0L, 1.0L, gen);
+    float val = effect.getNextSample(sample);
+    if (i % 1000 == 0)
     {
-        writefln("Testing %s..", name);
-        writefln("Initial State: %s", effect.toString()); 
+      outputs ~= val;
+      stringResults ~= effect.toString();
     }
+  }
 
-    float[] outputs;
-    string[] stringResults;
-
-    for(int i = 0; i < bufferSize; ++i){
-        float sample = uniform(0.0L, 1.0L, gen);
-        float val = effect.getNextSample(sample);
-        if(i%1000 == 0){
-            outputs ~= val;
-            stringResults ~= effect.toString();
-        }
-    }
-
-    if(outputResults)
+  if (outputResults)
+  {
+    for (int i = 0; i < outputs.length && i < stringResults.length; ++i)
     {
-        for(int i = 0; i < outputs.length && i < stringResults.length; ++i)
-        {
-            writefln("Output: %s ||| String: %s    ", outputs[i], stringResults[i]);
-        }
-        writefln("End %s test..", name);
+      writefln("Output: %s ||| String: %s    ", outputs[i], stringResults[i]);
     }
+    writefln("End %s test..", name);
+  }
 
 }
 
 unittest
 {
-    import std.stdio;
-    import ddsp.effect.digitaldelay;
+  import std.stdio;
+  import ddsp.effect.digitaldelay;
 
-    /*auto fxchain = mallocEmplace!FXChain();
+  /*auto fxchain = mallocEmplace!FXChain();
 
     auto d = mallocEmplace!DigitalDelay();
     d.initialize(44100, 2000, 500, 0.5, 0.5);
@@ -164,3 +170,4 @@ unittest
 
     testEffect(fxchain, "FX Chain");*/
 }
+
