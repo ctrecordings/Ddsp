@@ -243,16 +243,6 @@ nothrow:
         }
     }
 
-    override float getNextSample(const(float) input)
-    {
-        float output = input;
-        foreach (lpf; _secondOrderLowpasses)
-        {
-            output = lpf.getNextSample(output);
-        }
-        return output;
-    }
-
     override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
         foreach (lpf; _secondOrderLowpasses)

@@ -19,7 +19,7 @@ class OnePoleFilter(T) : AudioEffect!T
         foreach (sample; 0 .. numSamples)
         {
             outputBuffer[sample] = _a0 * outputBuffer[sample] - _b1 * _yn1;
-            _yn1 = input;
+            _yn1 = outputBuffer[sample];
         }
     }
 
