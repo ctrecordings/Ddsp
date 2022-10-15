@@ -46,7 +46,7 @@ public:
     override void calcCoefficients()
     {
         _alpha = (tan(pi * _frequency / _sampleRate) - 1) / (tan(pi * _frequency / _sampleRate) + 1);
-        
+
         _a0 = _alpha;
         _a1 = 1.0;
         _a2 = 0.0;
@@ -62,13 +62,12 @@ unittest
 {
     import dplug.core.nogc;
     import ddsp.effect : testEffect;
-    
+
     AllpassO1!float f = mallocNew!(AllpassO1!float)();
     f.setSampleRate(44100);
     f.setFrequency(10000);
     testEffect(f, "AllpassO1", 44100 * 2, false);
 }
-
 
 /// 2nd order Allpass filter for introducting a 180 degrees phase shift at the center
 /// frequency.  This is necessary for summing more than 2 bands created from 2nd order
@@ -107,7 +106,7 @@ unittest
 {
     import dplug.core.nogc;
     import ddsp.effect : testEffect;
-    
+
     AllpassO2!float f = mallocNew!(AllpassO2!float)();
     f.setSampleRate(44100);
     f.setFrequency(10000);
@@ -127,12 +126,12 @@ nothrow:
         _order = order;
 
         // if odd order then we need one 1st order component
-        if(_order % 2 != 0)
+        if (_order % 2 != 0)
         {
             _1stOrderFilter = mallocNew!(AllpassO1!T)();
         }
 
-        foreach(i; 0..(_order / 2))
+        foreach (i; 0 .. (_order / 2))
         {
             _2ndOrderFilters.pushBack(mallocNew!(AllpassO2!T)());
         }
@@ -140,16 +139,16 @@ nothrow:
 
     void setFrequency(float frequency)
     {
-        if(_freqency != frequency)
+        if (_freqency != frequency)
         {
             _freqency = frequency;
 
-            if(_1stOrderFilter)
+            if (_1stOrderFilter)
             {
                 _1stOrderFilter.setFrequency(_freqency);
             }
 
-            foreach(i; 0..(_order / 2))
+            foreach (i; 0 .. (_order / 2))
             {
                 _2ndOrderFilters[i].setFrequency(_freqency);
             }
@@ -158,46 +157,46 @@ nothrow:
 
     override void setSampleRate(float sampleRate)
     {
-        if(_sampleRate != sampleRate)
+        if (_sampleRate != sampleRate)
         {
             _sampleRate = sampleRate;
 
-            if(_1stOrderFilter)
+            if (_1stOrderFilter)
             {
                 _1stOrderFilter.setSampleRate(_sampleRate);
             }
 
-            foreach(i; 0..(_order / 2))
+            foreach (i; 0 .. (_order / 2))
             {
                 _2ndOrderFilters[i].setSampleRate(_sampleRate);
             }
         }
     }
 
-    override float getNextSample(const(float) input)
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
-        float output = input;
-        if(_1stOrderFilter)
+        if (_1stOrderFilter)
         {
-            output = _1stOrderFilter.getNextSample(output);
+            _1stOrderFilter.processBuffers(inputBuffer, outputBuffer, numSamples);
+        }
+        else
+        {
+            foreach (i; 0 .. (_order / 2))
+            {
+                _2ndorderFilters.processBuffers(inputBuffer, outputBuffer, numSamples);
+            }
         }
 
-        foreach(i; 0..(_order / 2))
-        {
-            output = _2ndOrderFilters[i].getNextSample(output);
-        }
-
-        return output;
     }
 
     override void reset()
     {
-        if(_1stOrderFilter)
+        if (_1stOrderFilter)
         {
             _1stOrderFilter.reset();
         }
 
-        foreach(i; 0..(_order / 2))
+        foreach (i; 0 .. (_order / 2))
         {
             _2ndOrderFilters[i].reset();
         }

@@ -42,8 +42,8 @@ class LowpassO2(T) : BiQuad!T
 {
 public:
     void setQualityFactor(float Q) nothrow @nogc
-    { 
-        if(Q != _q)
+    {
+        if (Q != _q)
         {
             _q = Q;
             calcCoefficients();
@@ -62,7 +62,7 @@ public:
         _b1 = -2.0 * _gamma;
         _b2 = 2.0 * _beta;
     }
-    
+
 private:
     float _thetac;
     float _q = 0.707f;
@@ -89,6 +89,7 @@ public:
         _b1 = 2.0 * _a0 * (1 - _C * _C);
         _b2 = _a0 * (1.0f - sqrt(2.0f) * _C + _C * _C);
     }
+
 private:
     float _C;
 }
@@ -143,7 +144,6 @@ unittest
     LinkwitzRileyLP!float linkwitzRileyLP = new LinkwitzRileyLP!float();
 }
 
-
 class LinkwitzRileyLPNthOrder(T) : AudioEffect!T
 {
 public:
@@ -166,9 +166,9 @@ nothrow:
         _bw2.setFrequency(_frequency);
     }
 
-    override float getNextSample(const(float) input)
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
-        return _bw2.getNextSample(_bw1.getNextSample(input));
+        _bw1.processBuffers(inputBuffer, outputBuffer, numSamples);
     }
 
     override void reset()
@@ -197,16 +197,15 @@ unittest
     LinkwitzRileyLPNthOrder!float lr8thOrder = mallocNew!(LinkwitzRileyLPNthOrder!float)(8);
     lr8thOrder.setSampleRate(44100);
     lr8thOrder.setFrequency(400);
-    
-}
 
+}
 
 float[] calculateQValuesForButterworth(int filterOrder) nothrow @nogc
 {
     float[] qValues = mallocSlice!float(filterOrder / 2);
     immutable int denominator = 4 * filterOrder / 2;
     int numerator = 1;
-    foreach(fIndex; 0..(filterOrder / 2))
+    foreach (fIndex; 0 .. (filterOrder / 2))
     {
         qValues[fIndex] = abs(1 / (2 * cos(numerator * PI / denominator)));
         numerator += 2;
@@ -223,7 +222,7 @@ nothrow:
     {
         _order = order;
         _secondOrderLowpasses = mallocSlice!(LowpassO2!float)(order / 2);
-        foreach(index; 0..(order / 2))
+        foreach (index; 0 .. (order / 2))
         {
             _secondOrderLowpasses[index] = mallocNew!(LowpassO2!float)();
         }
@@ -231,11 +230,11 @@ nothrow:
 
     void setFrequency(float frequency)
     {
-        if(frequency != _frequency)
+        if (frequency != _frequency)
         {
             _frequency = frequency;
             float[] qValues = calculateQValuesForButterworth(_order);
-            foreach(index, lpf; _secondOrderLowpasses)
+            foreach (index, lpf; _secondOrderLowpasses)
             {
                 float qValue = qValues[index];
                 lpf.setFrequency(frequency);
@@ -247,18 +246,26 @@ nothrow:
     override float getNextSample(const(float) input)
     {
         float output = input;
-        foreach(lpf; _secondOrderLowpasses)
+        foreach (lpf; _secondOrderLowpasses)
         {
             output = lpf.getNextSample(output);
         }
         return output;
     }
 
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
+    {
+        foreach (lpf; _secondOrderLowpasses)
+        {
+            lpf.processBuffers(inputBuffer, outputBuffer, numSamples);
+        }
+    }
+
     override void reset()
     {
-        foreach(lpf; _secondOrderLowpasses)
+        foreach (lpf; _secondOrderLowpasses)
         {
-            if(lpf)
+            if (lpf)
             {
                 lpf.reset();
             }
@@ -267,10 +274,10 @@ nothrow:
 
     override void setSampleRate(float sampleRate)
     {
-        if(sampleRate != _sampleRate)
+        if (sampleRate != _sampleRate)
         {
             _sampleRate = sampleRate;
-            foreach(index; 0.._secondOrderLowpasses.length)
+            foreach (index; 0 .. _secondOrderLowpasses.length)
             {
                 _secondOrderLowpasses[index].setSampleRate(sampleRate);
             }
@@ -287,6 +294,7 @@ private:
 unittest
 {
     import std.stdio;
+
     writeln("****************************");
     writeln("* Butterworth Filter tests *");
     writeln("****************************");
@@ -294,7 +302,7 @@ unittest
     writeln("Q Value Calculations");
     float[] actual = calculateQValuesForButterworth(4);
     float[] expected = [0.541196100146197, 1.3065629648763764];
-    assert( actual ==  expected, "Failed for order = 4");
+    assert(actual == expected, "Failed for order = 4");
     writeln("passed for order = 4");
 
     ButterworthLPNthOrder!float butterworth4 = mallocNew!(ButterworthLPNthOrder!float)(4);
@@ -303,12 +311,12 @@ unittest
 
     float[] impulse = [1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f];
     float[] lpfOutput = [];
-    foreach(sample; impulse)
+    foreach (sample; impulse)
     {
         lpfOutput ~= butterworth4.getNextSample(sample);
     }
 
     writeln("Butterworth N=4 Output:");
     writeln(lpfOutput);
-    
+
 }

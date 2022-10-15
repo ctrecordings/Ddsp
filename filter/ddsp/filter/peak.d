@@ -17,22 +17,25 @@ public:
 
     void setGain(float gain) nothrow @nogc
     {
-        if(_gain != gain)
+        if (_gain != gain)
         {
             _gain = gain;
             calcCoefficients();
         }
     }
 
-    override T getNextSample(const T input)  nothrow @nogc
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
-        _w = input - _a1 * _w1 - _a2 * _w2;
-        _yn = _b0 * _w + _b1 *_w1 + _b2 * _w2;
+        foreach (sample; 0 .. numSamples)
+        {
+            _w = outputBuffer[sample] - _a1 * _w1 - _a2 * _w2;
+            _yn = _b0 * _w + _b1 * _w1 + _b2 * _w2;
 
-        _w2 = _w1;
-        _w1 = _w;
+            _w2 = _w1;
+            _w1 = _w;
 
-        return _yn;
+            outputBuffer[sample] = _yn;
+        }
     }
 
     override void reset() nothrow @nogc
@@ -46,22 +49,26 @@ public:
 
     void setFrequency(float frequency) nothrow @nogc
     {
-        if(_frequency != frequency)
+        if (_frequency != frequency)
         {
             _frequency = frequency;
             calcCoefficients();
         }
     }
-    
+
     override string toString()
     {
         import std.conv;
+
         return "a0: " ~ to!string(_a0) ~
-               "a1: " ~ to!string(_a1) ~
-               "a2: " ~ to!string(_a2) ~
-               "b0: " ~ to!string(_b0) ~
-               "b1: " ~ to!string(_b1) ~
-               "b2: " ~ to!string(_b2);
+            "a1: " ~ to!string(
+                _a1) ~
+            "a2: " ~ to!string(
+                _a2) ~
+            "b0: " ~ to!string(
+                _b0) ~
+            "b1: " ~ to!string(_b1) ~
+            "b2: " ~ to!string(_b2);
     }
 
 private:
@@ -81,22 +88,22 @@ private:
     float _frequency;
     float _gain;
 
-    const double doubleLn2  =0.69314718055994530941723212145818;
+    const double doubleLn2 = 0.69314718055994530941723212145818;
 
     void calcCoefficients() nothrow @nogc
     {
         float bandWidth = 0.707f;
-        float A  = pow (10, _gain/40);
+        float A = pow(10, _gain / 40);
         float w0 = 2 * pi * _frequency / _sampleRate;
         float cs = cos(w0);
         float sn = sin(w0);
-        float AL = sn * sinh( doubleLn2/2 * bandWidth * w0/sn );
-        _b0 =  1 + AL * A;
+        float AL = sn * sinh(doubleLn2 / 2 * bandWidth * w0 / sn);
+        _b0 = 1 + AL * A;
         _b1 = -2 * cs;
-        _b2 =  1 - AL * A;
-        _a0 =  1 + AL / A;
+        _b2 = 1 - AL * A;
+        _a0 = 1 + AL / A;
         _a1 = -2 * cs;
-        _a2 =  1 - AL / A;
+        _a2 = 1 - AL / A;
 
         _b0 /= _a0;
         _b1 /= _a0;
@@ -113,7 +120,7 @@ unittest
     import ddsp.effect.effect;
 
     Vec!(BandShelf!float) filters = makeVec!(BandShelf!float);
-    foreach(channel; 0..2)
+    foreach (channel; 0 .. 2)
     {
         filters.pushBack(mallocNew!(BandShelf!float));
         filters[channel].setSampleRate(44100.0f);
@@ -122,6 +129,6 @@ unittest
     }
 
     //testEffect(AudioEffect effect, string name, size_t bufferSize = 20000, bool outputResults = false)
-    foreach(filter; filters)
-        testEffect(filter, "BandShelf" , 20000, false);
+    foreach (filter; filters)
+        testEffect(filter, "BandShelf", 20000, false);
 }
