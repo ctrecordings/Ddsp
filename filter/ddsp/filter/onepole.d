@@ -14,11 +14,13 @@ class OnePoleFilter(T) : AudioEffect!T
         calcCoefficients();
     }
 
-    override float getNextSample( const(float) input) nothrow @nogc 
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
-        immutable float output = _a0 * input - _b1 * _yn1;
-        _yn1 = input;
-        return output;
+        foreach (sample; 0 .. numSamples)
+        {
+            outputBuffer[sample] = _a0 * outputBuffer[sample] - _b1 * _yn1;
+            _yn1 = input;
+        }
     }
 
     override void reset() nothrow @nogc
@@ -52,7 +54,6 @@ class OnePoleLPF(T) : OnePoleFilter!T
     }
 }
 
-
 class OnePoleHPF(T) : OnePoleFilter!T
 {
     override void calcCoefficients()
@@ -67,6 +68,7 @@ class OnePoleHPF(T) : OnePoleFilter!T
 unittest
 {
     import std.stdio;
+
     writeln("****************************");
     writeln("* One-pole Filter tests    *");
     writeln("****************************");
@@ -82,7 +84,7 @@ unittest
     float[] impulse = [1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f];
     float[] lpfOutput = [];
     float[] hpfOutput = [];
-    foreach(sample; impulse)
+    foreach (sample; impulse)
     {
         lpfOutput ~= lowpass.getNextSample(sample);
         hpfOutput ~= highpass.getNextSample(sample);

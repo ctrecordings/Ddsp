@@ -46,8 +46,8 @@ class HighpassO2(T) : BiQuad!T
 {
 public:
     void setQualityFactor(float Q) nothrow @nogc
-    { 
-        if(Q != _q)
+    {
+        if (Q != _q)
         {
             _q = Q;
             calcCoefficients();
@@ -62,12 +62,12 @@ public:
         _gamma = (0.5 + _beta) * cos(_thetac);
 
         _a0 = (0.5 + _beta + _gamma) / 2;
-        _a1 = - (0.5 + _beta + _gamma);
+        _a1 = -(0.5 + _beta + _gamma);
         _a2 = _a0;
         _b1 = -2.0 * _gamma;
         _b2 = 2.0 * _beta;
     }
-    
+
 private:
     float _thetac;
     float _q = 0.707f;
@@ -89,6 +89,7 @@ public:
     {
         super();
     }
+
     override void calcCoefficients() nothrow @nogc
     {
         _C = tan(PI * _frequency / _sampleRate);
@@ -141,6 +142,7 @@ nothrow:
     {
         return !(isNaN(_theta) || isNaN(_omega) || isNaN(_kappa) || isNaN(_delta));
     }
+
 private:
     float _theta;
     float _omega;
@@ -170,7 +172,7 @@ nothrow:
 
     void setFrequency(float frequency)
     {
-        if(frequency != _frequency)
+        if (frequency != _frequency)
         {
             _frequency = frequency;
             _bw1.setFrequency(_frequency);
@@ -178,9 +180,11 @@ nothrow:
         }
     }
 
-    override float getNextSample(const(float) input)
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
-        return _bw2.getNextSample(_bw1.getNextSample(input));
+        _bw1.processBuffers(inputBuffer, outputBuffer, numSamples);
+        _bw2.processBuffers(inputBuffer, outputBuffer, numSamples);
+
     }
 
     override void reset()
@@ -191,7 +195,7 @@ nothrow:
 
     override void setSampleRate(float sampleRate)
     {
-        if(sampleRate != _sampleRate)
+        if (sampleRate != _sampleRate)
         {
             _sampleRate = sampleRate;
             _bw1.setSampleRate(_sampleRate);
@@ -212,7 +216,7 @@ unittest
     LinkwitzRileyHPNthOrder!float lr8thOrder = mallocNew!(LinkwitzRileyHPNthOrder!float)(8);
     lr8thOrder.setSampleRate(44100);
     lr8thOrder.setFrequency(400);
-    
+
 }
 
 class ButterworthHPNthOrder(T) : AudioEffect!T
@@ -224,7 +228,7 @@ nothrow:
     {
         _order = order;
         _secondOrderHighpasses = mallocSlice!(HighpassO2!float)(order / 2);
-        foreach(index; 0..(order / 2))
+        foreach (index; 0 .. (order / 2))
         {
             _secondOrderHighpasses[index] = mallocNew!(HighpassO2!float)();
         }
@@ -232,11 +236,11 @@ nothrow:
 
     void setFrequency(float frequency)
     {
-        if(frequency != _frequency)
+        if (frequency != _frequency)
         {
             _frequency = frequency;
             float[] qValues = calculateQValuesForButterworth(_order);
-            foreach(index, hpf; _secondOrderHighpasses)
+            foreach (index, hpf; _secondOrderHighpasses)
             {
                 float qValue = qValues[index];
                 hpf.setFrequency(frequency);
@@ -245,21 +249,29 @@ nothrow:
         }
     }
 
-    override float getNextSample(const(float) input)
+    /* override float getNextSample(const(float) input) */
+    /* { */
+    /*   float output = input; */
+    /*   foreach (hpf; _secondOrderHighpasses) */
+    /*   { */
+    /*     output = hpf.getNextSample(output); */
+    /*   } */
+    /*   return output; */
+    /* } */
+
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
-        float output = input;
-        foreach(hpf; _secondOrderHighpasses)
+        foreach (hpf; _secondOrderHighpasses)
         {
-            output = hpf.getNextSample(output);
+            hpf.processBuffers(inputBuffer, outputBuffer, numSamples);
         }
-        return output;
     }
 
     override void reset()
     {
-        foreach(hpf; _secondOrderHighpasses)
+        foreach (hpf; _secondOrderHighpasses)
         {
-            if(hpf)
+            if (hpf)
             {
                 hpf.reset();
             }
@@ -268,10 +280,10 @@ nothrow:
 
     override void setSampleRate(float sampleRate)
     {
-        if(sampleRate != _sampleRate)
+        if (sampleRate != _sampleRate)
         {
             _sampleRate = sampleRate;
-            foreach(index; 0.._secondOrderHighpasses.length)
+            foreach (index; 0 .. _secondOrderHighpasses.length)
             {
                 _secondOrderHighpasses[index].setSampleRate(sampleRate);
             }
@@ -288,6 +300,7 @@ private:
 unittest
 {
     import std.stdio;
+
     writeln("****************************");
     writeln("* Butterworth Filter tests *");
     writeln("****************************");
@@ -295,7 +308,7 @@ unittest
     writeln("Q Value Calculations");
     float[] actual = calculateQValuesForButterworth(4);
     float[] expected = [0.541196100146197, 1.3065629648763764];
-    assert( actual ==  expected, "Failed for order = 4");
+    assert(actual == expected, "Failed for order = 4");
     writeln("passed for order = 4");
 
     ButterworthHPNthOrder!float butterworth4 = mallocNew!(ButterworthHPNthOrder!float)(4);
@@ -304,12 +317,12 @@ unittest
 
     float[] impulse = [1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f];
     float[] hpfOutput = [];
-    foreach(sample; impulse)
+    foreach (sample; impulse)
     {
         hpfOutput ~= butterworth4.getNextSample(sample);
     }
 
     writeln("Butterworth N=4 Output:");
     writeln(hpfOutput);
-    
+
 }
