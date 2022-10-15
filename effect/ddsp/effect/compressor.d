@@ -20,53 +20,56 @@ class Compressor(T) : DynamicsProcessor!T
 public:
 nothrow:
 @nogc:
-    
-    override T getNextSample(const T input)
-    {
-        detector.detect(input * 4);
 
-        float detectorValue;
-        if(linkedDetector !is null)
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples) nothrow @nogc
+    {
+        foreach (sample; 0 .. numSamples)
         {
-            float thisDetector = detector.getEnvelope();
-            float otherDetector = linkedDetector.getEnvelope();
-            detectorValue = floatToDecibel((thisDetector + otherDetector) * 0.5);
+            detector.detect(outputBuffer[sample] * 4);
+
+            float detectorValue;
+            if (linkedDetector !is null)
+            {
+                float thisDetector = detector.getEnvelope();
+                float otherDetector = linkedDetector.getEnvelope();
+                detectorValue = floatToDecibel((thisDetector + otherDetector) * 0.5);
+            }
+            else
+                detectorValue = floatToDecibel(detector.getEnvelope());
+
+            outputBuffer[sample] = outputBuffer[sample] * calcCompressorGain(detectorValue, _threshold, _ratio, _kneeWidth);
         }
-        else
-            detectorValue = floatToDecibel(detector.getEnvelope());
-        
-        return input * calcCompressorGain(detectorValue, _threshold, _ratio, _kneeWidth);
     }
-    
+
 protected:
 
     /// If set to true, ratio will become infinite and result in limiting
     bool _limit;
-    
+
     /// This is the function that does most of the work with calculating compression
     float calcCompressorGain(float detectorValue, float threshold, float ratio, float kneeWidth)
     {
         float CS = 1.0f - 1.0f / ratio;
-        
-        if(_limit)
+
+        if (_limit)
             CS = 1.0f;
-            
-        if(kneeWidth > 0 && detectorValue > (threshold - kneeWidth / 2.0f) && 
-           detectorValue < threshold + kneeWidth / 2.0f)
+
+        if (kneeWidth > 0 && detectorValue > (threshold - kneeWidth / 2.0f) &&
+            detectorValue < threshold + kneeWidth / 2.0f)
         {
             x[0] = threshold - kneeWidth / 2.0f;
             x[1] = threshold + kneeWidth / 2.0f;
             x[1] = clamp(x[1], -96.0f, 0.0f);
             y[0] = 0;
             y[1] = CS;
-            
+
             CS = lagrpol(x, y, 2, detectorValue);
         }
-        
+
         float yG = CS * (threshold - detectorValue);
-        
+
         yG = clamp(yG, -96.0, 0);
-        
+
         return pow(10.0f, yG / 20.0f);
     }
 }
@@ -81,40 +84,45 @@ class Limiter(T) : Compressor!T
 {
     private import ddsp.util.buffer;
     private import dplug.core.nogc;
+
 nothrow:
 @nogc:
 public:
-    
+
     /// maxLookAhead is 300 by default.  If you intend to use a longer look-ahead
     /// time then it is best to specify it here so that no reallocation is needed
     /// later.
     this(int maxLookAhead = 300)
     {
         _lookAheadAmount = msToSamples(maxLookAhead, _sampleRate);
-        _buffer = mallocNew!(Buffer!float)(cast(size_t)_lookAheadAmount);
+        _buffer = mallocNew!(Buffer!float)(cast(size_t) _lookAheadAmount);
         _ratio = float.infinity;
         _limit = true;
     }
-    
-    override T getNextSample(const T input)
+
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples) nothrow @nogc
     {
-        _buffer.write(input);
-        float lookAheadOutput = _buffer.read();
-        detector.detect(input);
-        float detectorValue = floatToDecibel(detector.getEnvelope());
-        return lookAheadOutput * calcCompressorGain(detectorValue, _threshold, _ratio, _kneeWidth);
+        foreach (sample; 0 .. numSamples)
+        {
+            _buffer.write(outputBuffer[sample]);
+            float lookAheadOutput = _buffer.read();
+            detector.detect(outputBuffer[sample]);
+            float detectorValue = floatToDecibel(detector.getEnvelope());
+            outputBuffer[sample] = lookAheadOutput * calcCompressorGain(detectorValue, _threshold, _ratio, _kneeWidth);
+        }
     }
-    
+
     /// 
     void setLookAhead(int msLookAhead)
     {
         _lookAheadAmount = msToSamples(msLookAhead, _sampleRate);
-        _buffer.setSize(cast(size_t)_lookAheadAmount);
+        _buffer.setSize(cast(size_t) _lookAheadAmount);
     }
+
 private:
     /// Circular buffer that holds delay elements for look-ahead feature
     Buffer!float _buffer;
-    
+
     /// Current amount of lookahead being used in samples.
     float _lookAheadAmount;
 }

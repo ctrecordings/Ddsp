@@ -24,9 +24,9 @@ nothrow:
 
     /// Tracks the input level to trigger compression.
     PeakDetector!float detector;
-    
+
     /// Will point to the detector of a processor that is stereo linked
-    PeakDetector!float *linkedDetector;
+    PeakDetector!float* linkedDetector;
 
     this()
     {
@@ -34,7 +34,7 @@ nothrow:
         y = mallocSlice!float(2);
         detector = mallocNew!(PeakDetector!float)();
     }
-    
+
     void setParams(float attackTime, float releaseTime, float threshold, float ratio, float knee)
     {
         detector.setEnvelope(attackTime, releaseTime);
@@ -42,23 +42,28 @@ nothrow:
         _ratio = ratio;
         _kneeWidth = knee;
     }
-    
-    override T getNextSample(const T input)
+
+    override T getNextSample(T input)
     {
         return 0;
     }
-    
+
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples) nothrow @nogc
+    {
+
+    }
+
     override void reset() nothrow @nogc
     {
-        
+
     }
-    
+
     override void setSampleRate(float sampleRate)
     {
         _sampleRate = sampleRate;
         detector.setSampleRate(_sampleRate);
     }
-    
+
     /// Allows this processors envelope to be linked to another processor.
     /// This way the two will act as a single unit.  Both processors must call
     /// this on each other to function properly
@@ -67,34 +72,34 @@ nothrow:
         linkedDetector = &stereoProcessor.detector;
         stereoProcessor.linkedDetector = &this.detector;
     }
-    
+
 protected:
     /// Amount of input gain in decibels
     float _inputGain;
-    
+
     /// Level in decibels that the input signal must cross before compression begins
     float _threshold;
-    
+
     /// Time in milliseconds before compression begins after threshold has been
     /// crossed
     float _attTime;
-    
+
     /// Time in milliseconds before the compression releases after the input signal
     /// has fallen below the threshold
     float _relTime;
-    
+
     /// Ratio of compression, higher ratio = more compression
     float _ratio;
-    
+
     /// Amount of output gain in decibels
     float _outputGain;
-    
+
     /// width of the curve that interpolates between input and output.  Unit in
     /// decibels
     float _kneeWidth;
-    
+
     /// Holds the points used for interpolation;
-    float[]  x, y;
+    float[] x, y;
 
     //DynamicsProcessor _linkedProcessor;
 }
@@ -103,3 +108,4 @@ unittest
 {
     DynamicsProcessor!float dynamicsProcessor = new DynamicsProcessor!float();
 }
+

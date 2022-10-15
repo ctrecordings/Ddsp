@@ -62,18 +62,20 @@ nothrow:
         delay.setParams(0, feedback, mix);
     }
 
-    override T getNextSample(const T input)
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
-        float fYn = 0.0;
-        float fYqn = 0.0;
-        lfo.doOscillate(&fYn, &fYqn);
 
-        float delaySamples = calcDelayOffset(fYn);
-        delay.setParams(delaySamples, _feedback, _mix);
+        foreach (sample; 0 .. numSamples)
+        {
+            float fYn = 0.0;
+            float fYqn = 0.0;
+            lfo.doOscillate(&fYn, &fYqn);
 
-        float output = delay.getNextSample(input);
+            float delaySamples = calcDelayOffset(fYn);
+            delay.setParams(delaySamples, _feedback, _mix);
 
-        return output;
+            outputBuffer[sample] = delay.getNextSample(outputBuffer[sample]);
+        }
     }
 
     override void reset()
@@ -81,6 +83,7 @@ nothrow:
         lfo.reset();
         delay.reset();
     }
+
 private:
     float _mod_rate;
     float _mod_depth;
@@ -95,7 +98,7 @@ private:
     DigitalDelay!T delay;
 }
 
-unittest 
+unittest
 {
     ModDelay!float modDelay = new ModDelay!float();
 }
@@ -111,21 +114,21 @@ nothrow:
         _modDelay = calloc!(ModDelay!T).init();
     }
 
-	override void setSampleRate(float sampleRate)
-	{
-		_sampleRate = sampleRate;
-		_modDelay.setSampleRate(_sampleRate);
-		_modDelay.setDelayRange(0, 7);
-	}
+    override void setSampleRate(float sampleRate)
+    {
+        _sampleRate = sampleRate;
+        _modDelay.setSampleRate(_sampleRate);
+        _modDelay.setDelayRange(0, 7);
+    }
 
     void setParams(float modRate, float modDepth, int oscType = 0)
     {
         _modDelay.setParams(modRate, modDepth, 0.5, 0.5, 0, oscType);
     }
 
-    override float getNextSample(const float input)
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
-        return _modDelay.getNextSample(input);
+        return _modDelay.processBuffers(inputBuffer, outputBuffer, numSamples);
     }
 
     override void reset()
@@ -153,21 +156,21 @@ nothrow:
         _modDelay = calloc!(ModDelay!T).init();
     }
 
-	override void setSampleRate(float sampleRate)
-	{
-		_sampleRate = sampleRate;
-		_modDelay.setSampleRate(_sampleRate);
-		_modDelay.setDelayRange(0, 7);
-	}
+    override void setSampleRate(float sampleRate)
+    {
+        _sampleRate = sampleRate;
+        _modDelay.setSampleRate(_sampleRate);
+        _modDelay.setDelayRange(0, 7);
+    }
 
     void setParams(float modRate, float modDepth, int oscType = 0)
     {
         _modDelay.setParams(modRate, modDepth, 1.0, 0.0, 0, oscType);
     }
 
-    override T getNextSample(const T input)
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
-        return _modDelay.getNextSample(input);
+        _modDelay.processBuffers(inputBuffer, outputBuffer, numSamples);
     }
 
     override void reset()
@@ -195,21 +198,21 @@ nothrow:
         _modDelay = calloc!(ModDelay!T).init();
     }
 
-	override void setSampleRate(float sampleRate)
-	{
-		_sampleRate = sampleRate;
-		_modDelay.setSampleRate(_sampleRate);
-		_modDelay.setDelayRange(5, 30);
-	}
+    override void setSampleRate(float sampleRate)
+    {
+        _sampleRate = sampleRate;
+        _modDelay.setSampleRate(_sampleRate);
+        _modDelay.setDelayRange(5, 30);
+    }
 
     void setParams(float modRate, float modDepth, int oscType = 0)
     {
         _modDelay.setParams(modRate, modDepth, 0.5, 0.0, 0, oscType);
     }
 
-    override T getNextSample(const T input)
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
-        return _modDelay.getNextSample(input);
+        _modDelay.processBuffers(inputBuffer, outputBuffer, numSamples);
     }
 
     override void reset()
