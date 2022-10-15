@@ -22,41 +22,42 @@ nothrow:
     {
         init = false;
     }
-    
+
     void setFrequency(float frequency) nothrow @nogc
     {
         fo = frequency;
-        
+
         theta = 2 * PI * fo / _sampleRate;
         epsilon = 2 * sin(theta / 2);
-        
-        if(!init)
+
+        if (!init)
         {
             yn1 = sin(-1 * theta);
             yq1 = cos(-1 * theta);
             init = true;
         }
     }
-    
-    override T getNextSample(const T input) nothrow @nogc
+
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
-        yq = yq1-epsilon * yn1;
-        yn = epsilon * yq + yn1;
-        
-        yq1 = yq;
-        yn1 = yn;
-        
-        return yn;
+        foreach (sample; 0 .. numSamples)
+        {
+            yq = yq1 - epsilon * yn1;
+            outputBuffer[sample] = epsilon * yq + yn1;
+
+            yq1 = yq;
+            yn1 = yn;
+        }
     }
-    
+
     override void reset() nothrow @nogc
     {
         init = false;
         setFrequency(fo);
     }
-    
+
 private:
-    
+
     float yq;
     float yq1;
     float yn;
@@ -64,7 +65,7 @@ private:
     float epsilon;
     float theta;
     float fo;
-    
+
     bool init;
 }
 
@@ -79,3 +80,4 @@ unittest
 
     testEffect(osc, "Coupled-Form Oscillator", 20000, false);
 }
+
