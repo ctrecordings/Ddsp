@@ -48,32 +48,35 @@ nothrow:
         lowpassIn.setFrequency(nyquistFrequency);
         lowpassOut.setFrequency(nyquistFrequency);
 
-        foreach(effect; effects)
+        foreach (effect; effects)
         {
             effect.setSampleRate(_sampleRate);
         }
     }
 
-    override T getNextSample(const T input)
+    override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
     {
-        upSample(input);
-        doLowpassIn();
-        foreach(effect; effects)
+        foreach (sample; 0 .. numSamples)
         {
-            for(int i = 0; i < _bufferSize; ++i)
+            upSample(inputBuffer[sample]);
+            doLowpassIn();
+            foreach (effect; effects)
             {
-                buffer[i] = effect.getNextSample(buffer[i]);
+                for (int i = 0; i < _bufferSize; ++i)
+                {
+                    buffer[i] = effect.getNextSample(buffer[i]);
+                }
             }
+            doLowpassOut();
+            outputBuffer[sample] = buffer[0];
         }
-        doLowpassOut();
-        return buffer[0];
     }
 
     void upSample(const float input)
     {
         buffer[0] = buffer[_bufferSize - 1];
         buffer[_bufferSize - 1] = input;
-        for(int i = 1; i < _bufferSize - 1; ++i)
+        for (int i = 1; i < _bufferSize - 1; ++i)
         {
             buffer[i] = linearInterp(0, _bufferSize - 1, buffer[0], input, i);
         }
@@ -83,7 +86,7 @@ nothrow:
     {
         lowpassIn.reset();
         lowpassOut.reset();
-        foreach(effect; effects)
+        foreach (effect; effects)
         {
             effect.reset();
         }
@@ -92,7 +95,7 @@ nothrow:
     /// Note that buffer includes previous sample and current sample so its size is 2^factor + 1
     T[] Buffer() @property
     {
-        return buffer[0.._bufferSize];
+        return buffer[0 .. _bufferSize];
     }
 
     float Nyquist() @property
@@ -104,7 +107,6 @@ nothrow:
     {
         effects.pushBack(effect);
     }
-
 
 private:
     uint _bufferSize;
@@ -119,13 +121,13 @@ private:
     void initializeBuffer()
     {
         assert(_bufferSize >= 1, "Must set oversample factor");
-        buffer = cast(float*)malloc(float.sizeof * _bufferSize);
-        buffer[0]  = 0;
+        buffer = cast(float*) malloc(float.sizeof * _bufferSize);
+        buffer[0] = 0;
     }
 
     void doLowpassIn()
     {
-        for(int i = 1; i < _bufferSize; ++i)
+        for (int i = 1; i < _bufferSize; ++i)
         {
             buffer[i] = lowpassIn.getNextSample(buffer[i]);
         }
@@ -133,7 +135,7 @@ private:
 
     void doLowpassOut()
     {
-        for(int i = 1; i < _bufferSize; ++i)
+        for (int i = 1; i < _bufferSize; ++i)
         {
             buffer[i] = lowpassOut.getNextSample(buffer[i]);
         }
@@ -148,7 +150,6 @@ unittest
     OverSampler!float sampler = new OverSampler!float();
     sampler.setSampleFactor(2);
     sampler.setSampleRate(44100);
-    
 
     sampler.upSample(0.5);
     sampler.upSample(1.0);
@@ -168,8 +169,18 @@ unittest
     class Distorter(T) : AudioEffect!T
     {
         private import std.math;
-        override T getNextSample(const T input) { return sin(input * PI_2);}
-        override void reset() {}
+
+        override void processBuffers(const(T)* inputBuffer, T* outputBuffer, int numSamples)
+        {
+            foreach (sample; 0 .. numSamples)
+            {
+                outputBuffer[sample] = sin(outputBuffer[sample] * PI_2);
+            }
+        }
+
+        override void reset()
+        {
+        }
     }
 
     Distorter!float distorter = calloc!(Distorter!float).init();
@@ -180,3 +191,4 @@ unittest
     sampler.insertEffect(distorter);
     testEffect(sampler, "Oversampler", 20000 * 4, false);
 }
+
