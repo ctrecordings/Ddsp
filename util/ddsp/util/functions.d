@@ -20,7 +20,7 @@ import std.algorithm : clamp;
 /// range -96 to 0
 T floatToDecibel(T = float)(T value) nothrow @nogc
 {
-    return 20 * log(value); 
+    return 20 * log10(value); 
 }
 
 /// Accepts a decibel value and returns its floating point equivalent.
@@ -41,7 +41,7 @@ T msToSamples(T = float)(T ms, T sampleRate) nothrow @nogc
 /// Returns the corresponding time in milliseconds.
 T samplesToMs(T = float)(T samples, T sampleRate) nothrow @nogc
 {
-    return samples / (1000 / sampleRate);
+    return samples / (sampleRate / 1000);
 }
 
 /// Lagrange Interpolation

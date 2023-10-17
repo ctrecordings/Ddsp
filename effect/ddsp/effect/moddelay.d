@@ -12,6 +12,8 @@ import ddsp.util.memory;
 
 import std.math;
 
+import std.algorithm : max;
+
 /// General purpose class for Modulated Delay effects. This class is used with 
 /// contraints on depth, offset, mix, and feedback to create other effects. (Flanger, Chorus, Tremolo, etc)
 class ModDelay(T) : AudioEffect!T
@@ -22,8 +24,8 @@ nothrow:
 
     this()
     {
-        lfo = calloc!WTOscillator.init();
-        delay = calloc!DigitalDelay.init();
+        lfo = calloc!(WTOscillator!T).init();
+        delay = calloc!(DigitalDelay!T).init();
     }
 
     override void setSampleRate(float sampleRate)
@@ -37,7 +39,7 @@ nothrow:
     {
         float startDelay = _min_delay + _delay_offset;
         float lfoOffset = _mod_depth * ((lfoValue + 1) / 2 * (_max_delay - _min_delay)) + _min_delay;
-        return lfoOffset + startDelay;
+        return max(lfoOffset + startDelay, 0);
     }
 
     /// Must be set before processing audio
@@ -89,8 +91,13 @@ private:
     float _max_delay;
     float _min_delay;
 
-    WTOscillator lfo;
-    DigitalDelay delay;
+    WTOscillator!T lfo;
+    DigitalDelay!T delay;
+}
+
+unittest 
+{
+    ModDelay!float modDelay = new ModDelay!float();
 }
 
 class Flanger(T) : AudioEffect!T
@@ -101,7 +108,7 @@ nothrow:
 
     this()
     {
-        _modDelay = calloc!ModDelay.init();
+        _modDelay = calloc!(ModDelay!T).init();
     }
 
 	override void setSampleRate(float sampleRate)
@@ -127,7 +134,12 @@ nothrow:
     }
 
 private:
-    ModDelay _modDelay;
+    ModDelay!T _modDelay;
+}
+
+unittest
+{
+    Flanger!float flanger = new Flanger!float();
 }
 
 class Vibrato(T) : AudioEffect!T
@@ -138,7 +150,7 @@ nothrow:
 
     this()
     {
-        _modDelay = calloc!ModDelay.init();
+        _modDelay = calloc!(ModDelay!T).init();
     }
 
 	override void setSampleRate(float sampleRate)
@@ -164,7 +176,12 @@ nothrow:
     }
 
 private:
-    ModDelay _modDelay;
+    ModDelay!T _modDelay;
+}
+
+unittest
+{
+    Vibrato!float vibrato = new Vibrato!float();
 }
 
 class Chorus(T) : AudioEffect!T
@@ -175,7 +192,7 @@ nothrow:
 
     this()
     {
-        _modDelay = calloc!ModDelay.init();
+        _modDelay = calloc!(ModDelay!T).init();
     }
 
 	override void setSampleRate(float sampleRate)
@@ -201,5 +218,10 @@ nothrow:
     }
 
 private:
-    ModDelay _modDelay;
+    ModDelay!T _modDelay;
+}
+
+unittest
+{
+    Chorus!float chorus = new Chorus!float();
 }

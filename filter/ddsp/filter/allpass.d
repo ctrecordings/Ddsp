@@ -27,88 +27,186 @@ module ddsp.filter.allpass;
 
 import std.math;
 
-import ddsp.effect.effect;
+import ddsp.filter.biquad;
+import ddsp.effect : AudioEffect;
 
-const float pi = 3.14159265;
+import dplug.core : Vec, mallocNew, makeVec;
 
-
-/// Allpass filter for introducting a 180 degrees phase shift at the center
-/// frequency.  This is necessary for summing more than 2 bands created from
-/// Linkwitz-Riley filters.
-/// TODO: Inherit BiQuad directly to remove redundent code.
-class Allpass(T) : AudioEffect!T
+/// 1st order Allpass filter for introducting a 90 degrees phase shift at the center
+/// frequency.
+class AllpassO1(T) : BiQuad!T
 {
 public:
 
     this() nothrow @nogc
     {
-
+        super();
     }
 
-    void initialize(float frequency, float q = 0.707) nothrow @nogc
+    override void calcCoefficients()
     {
-        _frequency = frequency;
-        float _w0 = 2 * pi * _frequency / _sampleRate;
-        float cs = cos(_w0);
-        float sn = sin(_w0);
-        float AL = sn / (2 * q);
-
-        _a0 = 1 + AL;
-        _a1 = (-2 * cs) / _a0;
-        _a2 = (1 - AL) / _a0;
-        _b0 = (1 - AL) / _a0;
-        _b1 = (-2 * cs) / _a0;
-        _b2 = (1 + AL) / _a0;
-    }
-
-    override T getNextSample(const T input)  nothrow @nogc
-    {
-        _w = input - _a1 * _w1 - _a2 * _w2;
-        _yn = _b0 * _w + _b1 *_w1 + _b2 * _w2;
-
-        _w2 = _w1;
-        _w1 = _w;
-
-        return _yn;
-    }
-
-    override void reset() nothrow @nogc
-    {
-        _w = 0;
-        _w1 = 0;
-        _w2 = 0;
-
-        _yn = 0;
-    }
-
-    void setFrequency(float frequency) nothrow @nogc
-    {
-        initialize(frequency);
+        _alpha = (tan(pi * _frequency / _sampleRate) - 1) / (tan(pi * _frequency / _sampleRate) + 1);
+        
+        _a0 = _alpha;
+        _a1 = 1.0;
+        _a2 = 0.0;
+        _b1 = _alpha;
+        _b2 = 0.0;
     }
 
 private:
-    float _a0 = 0;
-    float _a1 = 0;
-    float _a2 = 0;
-    float _b0 = 0;
-    float _b1 = 0;
-    float _b2 = 0;
-
-    float _w = 0;
-    float _w1 = 0;
-    float _w2 = 0;
-
-    float _yn;
-
-    float _frequency;
+    float _alpha;
 }
 
 unittest
 {
     import dplug.core.nogc;
+    import ddsp.effect : testEffect;
     
-    Allpass!float f = mallocNew!(Allpass!float)();
+    AllpassO1!float f = mallocNew!(AllpassO1!float)();
     f.setSampleRate(44100);
     f.setFrequency(10000);
-    testEffect(f, "Allpass", 44100 * 2, false);
+    testEffect(f, "AllpassO1", 44100 * 2, false);
+}
+
+
+/// 2nd order Allpass filter for introducting a 180 degrees phase shift at the center
+/// frequency.  This is necessary for summing more than 2 bands created from 2nd order
+/// Linkwitz-Riley filters.
+class AllpassO2(T) : BiQuad!T
+{
+public:
+
+    this() nothrow @nogc
+    {
+        super();
+    }
+
+    override void calcCoefficients()
+    {
+        immutable float _w0 = 2 * PI * _frequency / _sampleRate;
+        immutable float cs = cos(_w0);
+        immutable float sn = sin(_w0);
+        immutable float AL = sn / (2 * 0.707f);
+
+        immutable float _b0 = 1 + AL;
+        _b1 = (-2 * cs) / _b0;
+        _b2 = (1 - AL) / _b0;
+        _a0 = (1 - AL) / _b0;
+        _a1 = (-2 * cs) / _b0;
+        _a2 = (1 + AL) / _b0;
+    }
+}
+
+/// Deprecated: use `AllpassO2` instead.
+/// This is just an alias to `AllpassO2` since `Allpass` was renamed
+/// to `AllpassO2`
+alias Allpass = AllpassO2;
+
+unittest
+{
+    import dplug.core.nogc;
+    import ddsp.effect : testEffect;
+    
+    AllpassO2!float f = mallocNew!(AllpassO2!float)();
+    f.setSampleRate(44100);
+    f.setFrequency(10000);
+    testEffect(f, "AllpassO2", 44100 * 2, false);
+}
+
+/// Nth order Allpass filter created using 2nd and 1st order Allpass filters
+/// Useful to correct phase on crossovers created using nth order Linkwitz-Riley
+/// filters.
+class AllpassNthOrder(T) : AudioEffect!T
+{
+public:
+nothrow:
+@nogc:
+    this(int order)
+    {
+        _order = order;
+
+        // if odd order then we need one 1st order component
+        if(_order % 2 != 0)
+        {
+            _1stOrderFilter = mallocNew!(AllpassO1!T)();
+        }
+
+        foreach(i; 0..(_order / 2))
+        {
+            _2ndOrderFilters.pushBack(mallocNew!(AllpassO2!T)());
+        }
+    }
+
+    void setFrequency(float frequency)
+    {
+        if(_freqency != frequency)
+        {
+            _freqency = frequency;
+
+            if(_1stOrderFilter)
+            {
+                _1stOrderFilter.setFrequency(_freqency);
+            }
+
+            foreach(i; 0..(_order / 2))
+            {
+                _2ndOrderFilters[i].setFrequency(_freqency);
+            }
+        }
+    }
+
+    override void setSampleRate(float sampleRate)
+    {
+        if(_sampleRate != sampleRate)
+        {
+            _sampleRate = sampleRate;
+
+            if(_1stOrderFilter)
+            {
+                _1stOrderFilter.setSampleRate(_sampleRate);
+            }
+
+            foreach(i; 0..(_order / 2))
+            {
+                _2ndOrderFilters[i].setSampleRate(_sampleRate);
+            }
+        }
+    }
+
+    override float getNextSample(const(float) input)
+    {
+        float output = input;
+        if(_1stOrderFilter)
+        {
+            output = _1stOrderFilter.getNextSample(output);
+        }
+
+        foreach(i; 0..(_order / 2))
+        {
+            output = _2ndOrderFilters[i].getNextSample(output);
+        }
+
+        return output;
+    }
+
+    override void reset()
+    {
+        if(_1stOrderFilter)
+        {
+            _1stOrderFilter.reset();
+        }
+
+        foreach(i; 0..(_order / 2))
+        {
+            _2ndOrderFilters[i].reset();
+        }
+    }
+
+private:
+    Vec!(AllpassO2!T) _2ndOrderFilters;
+    AllpassO1!T _1stOrderFilter;
+
+    int _order;
+    float _freqency;
 }

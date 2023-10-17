@@ -38,7 +38,7 @@ nothrow:
         return input * calcCompressorGain(detectorValue, _threshold, _ratio, _kneeWidth);
     }
     
-private:
+protected:
 
     /// If set to true, ratio will become infinite and result in limiting
     bool _limit;
@@ -69,6 +69,11 @@ private:
         
         return pow(10.0f, yG / 20.0f);
     }
+}
+
+unittest
+{
+    Compressor!float compressor = new Compressor!float();
 }
 
 /// Basic look-ahead limiter that is based on the compressor from before.
@@ -112,4 +117,9 @@ private:
     
     /// Current amount of lookahead being used in samples.
     float _lookAheadAmount;
+}
+
+unittest
+{
+    Limiter!float limiter = new Limiter!float();
 }

@@ -9,6 +9,7 @@ import std.math;
 import std.algorithm;
 import ddsp.util.buffer;
 import dplug.core.nogc;
+import dplug.core.ringbuf;
 
 /// Envelop Detector with adjustable attack and release times. Great for compressors
 /// and meters.
@@ -23,18 +24,27 @@ nothrow:
 
     this()
     {
-        _envelope = 0f;    
+        _envelope = 0f;
+        setTimeConstant(0.01);
     }
     
     void setSampleRate(const float sampleRate)
     {
         _sampleRate = sampleRate;
     }
+
+
+    void setTimeConstant(const float timeConstant) {
+        _timeConstant = log10(timeConstant);
+    }
     
+    /**
+     * Set the attack and release times of the envelope detector in milliseconds
+     */
     void setEnvelope(const float attackTime, const float releaseTime)
     {
-        _ga = exp(-1/(_sampleRate * attackTime / 1000));
-        _gr = exp(-1 / (_sampleRate * releaseTime / 1000));
+        _ga = exp( _timeConstant /(_sampleRate * attackTime * 0.001));
+        _gr = exp( _timeConstant / (_sampleRate * releaseTime * 0.001));
     }
     
     T detect(T input)
@@ -45,12 +55,21 @@ nothrow:
             _envelope = _envelope * _ga + (1 - _ga) * envIn;
         else
             _envelope = _envelope * _gr + (1 - _gr) * envIn;
+
+        if(isNaN(_envelope)) {
+            _envelope = 0.0f;
+        }
         return _envelope;
     }
     
     T getEnvelope()
     {
         return _envelope;
+    }
+
+    void reset()
+    {
+        _envelope = 0;
     }
 
     abstract T processInput(T input);
@@ -67,6 +86,9 @@ private:
     
     /// Sample Rate
     float _sampleRate;
+
+    /// time constant used to calculate attack and release times
+    float _timeConstant;
 }
 
 /// Simple Peak envelope follower, useful for meters.
@@ -89,12 +111,15 @@ nothrow:
         return abs(input);
     }
     
-private:
-    float _envelope;
-    
+private:    
     float _decay;
     
     float _sampleRate;
+}
+
+unittest
+{
+    PeakDetector!float peakDetector = new PeakDetector!float();
 }
 
 class RMSDetector(T): EnvelopeDetector!T
@@ -149,7 +174,7 @@ unittest
         foreach(val; values)
         {
             auto result = rmsDetector.detect(val);
-            writeln(result);
+            // writeln(result);
         }
     }
 
@@ -161,7 +186,50 @@ unittest
         foreach(val; values)
         {
             auto result = peakDetector.detect(val);
-            writeln(result);
+            // writeln(result);
         }
     }
+}
+
+/**
+ * This class is used for calculating a moving average.  It's useful for things such
+ * as smoothing meter values.
+ */
+class MovingAverage(T)
+{
+public:
+nothrow:
+@nogc:
+
+    this(int windowSize)
+    {
+        _windowSize = windowSize;
+        _buffer = makeRingBufferNoGC!T(_windowSize);
+		_avg = 0;
+    }
+
+    T process(double sample)
+    {
+        T prevSample = _buffer.isFull() ? _buffer.popFront() : 0;
+        _avg -= prevSample / _windowSize;
+        _avg += sample / _windowSize;
+        _buffer.pushBack(sample);
+        return _avg;
+    }
+
+    T getAverage()
+    {
+        return _avg;
+    }
+
+private:
+    RingBufferNoGC!T _buffer;
+    int _windowSize;
+    T _avg;
+
+}
+
+unittest
+{
+    auto movingAverage = mallocNew!(MovingAverage!float)(100);
 }

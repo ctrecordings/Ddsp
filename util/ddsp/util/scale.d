@@ -57,9 +57,9 @@ class LogToLinearScale : Scale
 
     override float convert(float x)  nothrow @nogc
     {
-        x < _minVal ? x = _minVal : x = x;
-        x > _maxVal ? x = _maxVal : x = x;
-        return log(x / _a) / _b;
+        x = x < _minVal ? x : _minVal;
+        x = x > _maxVal ? _maxVal : x;
+        return log10(x / _a) / _b;
     }
 
     private:
@@ -81,14 +81,14 @@ class LinearToLogScale : Scale
     {
         _minVal = inputRange.x1;
         _maxVal = inputRange.x2;
-        _b = log(outputRange.x1/outputRange.x2)/(inputRange.x1 - inputRange.x2);
+        _b = log10(outputRange.x1/outputRange.x2)/(inputRange.x1 - inputRange.x2);
         _a = outputRange.x1 / exp(_b * inputRange.x1);
     }
 
     override float convert(float x)  nothrow @nogc
     {
-        x < _minVal ? x = _minVal : x = x;
-        x > _maxVal ? x = _maxVal : x = x;
+        x = x < _minVal ? x : _minVal;
+        x = x > _maxVal ? _maxVal : x;
         return _a * exp(_b * x);
     }
 

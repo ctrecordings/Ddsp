@@ -60,6 +60,11 @@ private:
     }
 }
 
+unittest
+{
+    Expander!float expander = new Expander!float();
+}
+
 class Gate(T) : Expander!T
 {
 public:
@@ -69,4 +74,9 @@ nothrow:
     {
         _gate = true;
     }
+}
+
+unittest
+{
+    Gate!float gate = new Gate!float();
 }

@@ -2,6 +2,8 @@ module ddsp.util.memory;
 
 import dplug.core.nogc;
 
+import core.stdc.stdlib;
+
 
 /// Template for allocating single instances of class or arrays of classes
 /// for multiple channels.

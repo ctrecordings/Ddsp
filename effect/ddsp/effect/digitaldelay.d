@@ -8,6 +8,8 @@ module ddsp.effect.digitaldelay;
 import ddsp.effect.effect;
 import ddsp.util.functions;
 
+import dplug.core.nogc;
+
 /**
 * A general purpose Digital Delay with support for external feedback,
   fractional delay, and feedback path effects.
@@ -28,7 +30,7 @@ public:
         _mix = 0.0f;
         _useExternalFeedback = false;
         
-        _readIndex = 0;
+        _readIndex = 1;
         _writeIndex = 0;
         
         feedbackFX = makeVec!(AudioEffect!T);
@@ -42,12 +44,12 @@ public:
         _sampleRate = sampleRate;
         _feedback = 0;
         _mix = 0;
-        _size = cast(uint)sampleRate * 2;
+        _size = cast(uint)sampleRate + 1;
 
         if(buffer != null)
             free(buffer);
 
-        buffer = cast(float*) malloc(_size * float.sizeof);
+        buffer = cast(float*) mallocSlice!float(_size);
         reset();
     }
     
@@ -57,6 +59,8 @@ public:
         _delayInSamples = msToSamples(msDelay, _sampleRate);
         if(_delayInSamples > _size)
         {
+            _size = cast(size_t)_delayInSamples + 1;
+            resizeOnNextReset = true;
             reset();
         }
         else
@@ -116,6 +120,10 @@ public:
     //set all elements in the buffer to 0, and reset indices.
     override void reset() nothrow @nogc
     {
+        if(resizeOnNextReset) {
+            resizeOnNextReset = false;
+            buffer = cast(float*) mallocSlice!float(_size);
+        }
         memset(buffer, 0, _size * float.sizeof);
 
         resetIndices();
@@ -167,6 +175,7 @@ protected:
     long _readIndex;
     
     bool _useExternalFeedback;
+    bool resizeOnNextReset;
     float _feedbackIn;
     
     Vec!(AudioEffect!T) feedbackFX;

@@ -67,22 +67,22 @@ class BiQuad(T) : AudioEffect!T
 
         override T getNextSample(const T input)  nothrow @nogc
         {
-            T output = (_a0 * input + _a1 * _xn1 + _a2 * _xn2 - _b1 * _yn1 - _b2 * _yn2) * _c0 + (input * _d0);
+            _w = input - _b1 * _w1 - _b2 * _w2;
+            _yn = (_a0 * _w + _a1 *_w1 + _a2 * _w2) * _c0 + (input * _d0);
 
-            _xn2 = _xn1;
-            _xn1 = input;
-            _yn2 = _yn1;
-            _yn1 = output;
+            _w2 = _w1;
+            _w1 = _w;
 
-            return output;
+            return _yn;
         }
 
         override void reset()
         {
-            _xn1 = 0;
-            _xn2 = 0;
-            _yn1 = 0;
-            _yn2 = 0;
+            _w = 0;
+            _w1 = 0;
+            _w2 = 0;
+
+            _yn = 0;
         }
 
         abstract void calcCoefficients() nothrow @nogc;
@@ -90,8 +90,10 @@ class BiQuad(T) : AudioEffect!T
     protected:
 
         //Delay samples
-        T _xn1=0, _xn2=0;
-        T _yn1=0, _yn2=0;
+        float _w = 0;
+        float _w1 = 0;
+        float _w2 = 0;
+        float _yn = 0;
 
         //Biquad Coeffecients
         T _a0=0, _a1=0, _a2=0;
@@ -101,14 +103,4 @@ class BiQuad(T) : AudioEffect!T
         float _sampleRate;
         float _qFactor;
         float _frequency;
-}
-
-unittest
-{
-    import dplug.core.nogc;
-
-    //BiQuad f = mallocNew!BiQuad();
-    //f.setSampleRate(44100);
-    //f.initialize(0.1, 0.3, 0.5, 0,5, 0.1);
-    //testEffect(f, "BiQuad", 44100 * 2, false);
 }
